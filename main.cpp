@@ -96,7 +96,7 @@ int main() {
         }
         Unique[j].Action = Action[i];
         if(Action[i] == 'C' || Action[i] == 'T'){
-            Unique[j].Page = NULL; //
+            Unique[j].Page = '\0';
             if(Action[i] == 'C'){
                 Unique[j].Created = true;
             }
@@ -125,14 +125,24 @@ int main() {
 }
 
 void FIFO(Process Proc){
+    bool table_full = false;
     if(Proc.Action == 'A' && Proc.Created){ //Allocating a created process
         for(int i=0; i < 20; i++){
             if(Page[i] == -1){
                 Page[i] = Proc.ID;
+                if(i == 19){
+                    table_full = true;
+                }
                 break;
             }
         }
     }
+
+    if(table_full){
+        //swap these puppies
+    }
+
+    //Need to now make it if table is full
 
 
 
