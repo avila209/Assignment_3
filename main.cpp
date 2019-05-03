@@ -139,14 +139,18 @@ void FIFO(Process Proc){
         }
     }
 
+    if(Proc.Action == 'T'){
+        for(int i = 0; i < 20; i++){
+            if(Proc.ID = Page[i]){
+                Page[i] = -1;
+            }
+        }
+    }
+
     if(table_full){
         //swap these puppies
     }
 
     //Need to now make it if table is full
-
-
-
-
 
 }
