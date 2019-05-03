@@ -7,12 +7,7 @@ int Page[20];
 
 struct Process{
     int ID;
-
-    /*
-    bool Created;
-    bool Terminated;
-    int *Allocated = new int [size];
-     */
+    bool Created = false;
     char Action;
     char Page;
 };
@@ -101,7 +96,13 @@ int main() {
         }
         Unique[j].Action = Action[i];
         if(Action[i] == 'C' || Action[i] == 'T'){
-            Unique[j].Page = NULL;
+            Unique[j].Page = NULL; //
+            if(Action[i] == 'C'){
+                Unique[j].Created = true;
+            }
+            else{
+                Unique[j].Created = false;
+            }
         }
         else{
             Unique[j].Page = VPage[i];
@@ -124,9 +125,17 @@ int main() {
 }
 
 void FIFO(Process Proc){
-    for(int i = 0; i < 20; i++){
-        if(Page[i] == -1 && Proc.Action == 'A' && Proc.Page == (i + '0')){
-            Page[i] = Proc.ID;
+    if(Proc.Action == 'A' && Proc.Created){ //Allocating a created process
+        for(int i=0; i < 20; i++){
+            if(Page[i] == -1){
+                Page[i] = Proc.ID;
+                break;
+            }
         }
     }
+
+
+
+
+
 }
