@@ -78,8 +78,33 @@ int main() {
         }
     }
 
-    for(int i = 0; i < NumProcesses; i++){
+    for(int i = 0; i < Unique_Proc; i++){
         cout << Unique[i].ID << endl;
+    }
+
+    for(int i = 0; i < size; i++){
+        if(Action[i] == 'C'){
+            for(int j = 0; j < Unique_Proc; j++){
+                if(Unique[j].ID  == ID[i]){
+                    Unique[j].Created = true;
+                }
+            }
+        }
+        if(Action[i] == 'T'){
+            for(int j = 0; j < Unique_Proc; j++){
+                if(Unique[j].ID  == ID[i]){
+                    Unique[j].Created = false;
+                    Unique[j].Terminated = true;
+                }
+            }
+        }
+        if(Action[i] == 'A'){
+            for(int j = 0; j < Unique_Proc; j++){
+                if(Unique[j].ID  == ID[i]){
+                    //Unique[j].Allocated = VPage[i]; *****DIS RIGHT HERE THE ISSUE MY GUY*****
+                }
+            }
+        }
     }
 
     int Page[20];
