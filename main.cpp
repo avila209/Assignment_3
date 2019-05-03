@@ -1,41 +1,46 @@
 #include <iostream>
 #include <fstream>
+#include <queue>
+
 using namespace std;
 
 int main() {
     ifstream file ("sample-jobs.dat");
 
-    if(file.is_open()){
-        cout << "File opened correctly." << endl;
+    string line; int size = 0;
+    while(!file.eof()){
+        getline(file,line);
+        size++;
     }
-    else{
-        cout << "Failed" << endl;
-    }
+    file.close();
+    file.open("sample-jobs.dat");
+    size--;
 
-    int ID[100];
-    char Action[100];
-    char Page[100];
+    if(file.is_open()) cout << "File opened correctly." << endl;
+    else cout << "Failed" << endl;
 
-    int i = 0;
+    int *ID = new int[size];
+    char *Action = new char[size];
+    char *VPage = new char[size];
+
     cout << "PID" << "\t" << "Act" << "\t" << "Page" << endl;
 
     while(!file.eof()){
-        file >> ID[i] >> ws >> Action[i] >> ws;
+        file >> *ID >> ws >> *Action >> ws;
 
-        if(Action[i] == 'C' || Action[i] == 'T'){
-            Page[i] = NULL;
-        }
-        else{
-            file >> Page[i];
-        }
+        if(*Action == 'C' || *Action == 'T') *VPage = '\0';
+        else file >> *VPage;
 
-        cout << ID[i] << "\t" << Action[i] << "\t" << Page[i] << endl;
+        cout << *ID << "\t" << *Action << "\t" << *VPage << endl;
 
-        if(i == 99){
-            break;
-        }
-        i++;
+        *ID++; *Action++; *VPage++;
     }
+
+    cout << endl;
+    cout << "*******************************************************************************" << endl;
+    cout << "**  0  1  2  3  4  5  6  7  8  9  10  11  12  13  14  15  16  17  18  19  20 **" << endl;
+    cout << "**                                                                           **" << endl;
+    cout << "*******************************************************************************" << endl;
 
     return 0;
 }
