@@ -6,17 +6,19 @@ int size = 0;
 int Page[20];
 
 struct Process{
-    int ID;
+    int ID = 0;
     bool Created = false;
-    char Action;
-    char Page;
+    char Action = '\0';
+    char Page = '\0';
 };
 
 void FIFO(Process Proc);
 
 int main() {
-    for(int i = 0; i < 20; i++){
-        Page[i] = -1;
+    int q = 0;
+    while(q < 20){
+        Page[q] = -1;
+        q++;
     }
 
     ifstream file("sample-jobs.dat");
@@ -55,15 +57,15 @@ int main() {
 
     int NumProcesses = 0;
     //Find all unique processes
-    for (int i=0; i<size; i++){
+    for (int z=0; z<size; z++){
         // Check if the picked element is already printed
         int j;
-        for (j=0; j<i; j++)
-            if (ID[i] == ID[j]){
+        for (j=0; j<z; j++)
+            if (ID[z] == ID[j]){
                 break;
             }
         // If not printed earlier, then print it
-        if (i == j){
+        if (z == j){
             NumProcesses++;
         }
     }
@@ -71,38 +73,37 @@ int main() {
     Process Unique[NumProcesses];
     int Unique_Proc = 0;
     //Store unique processes
-    for (int i=0; i<size; i++){
+    for (int k=0; k<size; k++){
         // Check if the picked element is already printed
         int j;
-        for (j=0; j<i; j++)
-            if (ID[i] == ID[j]){
+        for (j=0; j<k; j++)
+            if (ID[k] == ID[j]){
                 break;
             }
         // If not printed earlier, then print it
-        if (i == j){
-            Unique[Unique_Proc].ID = ID[i];
+        if (k == j){
+            Unique[Unique_Proc].ID = ID[k];
             Unique_Proc++;
         }
     }
 
-    for(int i = 0; i < Unique_Proc; i++){
+    for(i = 0; i < Unique_Proc; i++){
         cout << Unique[i].ID << endl;
     }
 
-    for(int i = 0; i < size; i++){
+    for(i = 0; i < size; i++){
         int j = 0;
         while(ID[i] != Unique[j].ID){
             j++;
         }
         Unique[j].Action = Action[i];
-        if(Action[i] == 'C' || Action[i] == 'T'){
+        if(Action[i] == 'C'){
             Unique[j].Page = '\0';
-            if(Action[i] == 'C'){
-                Unique[j].Created = true;
-            }
-            else{
-                Unique[j].Created = false;
-            }
+            Unique[j].Created = true;
+        }
+        else if(Action[i] == 'T'){
+            Unique[j].Page = '\0';
+            Unique[j].Created = false;
         }
         else{
             Unique[j].Page = VPage[i];
@@ -111,7 +112,7 @@ int main() {
     }
 
     cout << "PHYSICAL PAGE" << endl;
-    for(int i = 0; i < 20; i++){
+    for(i = 0; i < 20; i++){
         cout << i << "\t \t \t";
         if(Page[i] == -1){
             cout << "FREE" << endl;
