@@ -3,15 +3,27 @@
 
 using namespace std;
 int size = 0;
+int Page[20];
 
 struct Process{
     int ID;
+
+    /*
     bool Created;
     bool Terminated;
     int *Allocated = new int [size];
+     */
+    char Action;
+    char Page;
 };
 
+void FIFO(Process Proc);
+
 int main() {
+    for(int i = 0; i < 20; i++){
+        Page[i] = -1;
+    }
+
     ifstream file("sample-jobs.dat");
 
     string line;
@@ -83,31 +95,38 @@ int main() {
     }
 
     for(int i = 0; i < size; i++){
-        if(Action[i] == 'C'){
-            for(int j = 0; j < Unique_Proc; j++){
-                if(Unique[j].ID  == ID[i]){
-                    Unique[j].Created = true;
-                }
-            }
+        int j = 0;
+        while(ID[i] != Unique[j].ID){
+            j++;
         }
-        if(Action[i] == 'T'){
-            for(int j = 0; j < Unique_Proc; j++){
-                if(Unique[j].ID  == ID[i]){
-                    Unique[j].Created = false;
-                    Unique[j].Terminated = true;
-                }
-            }
+        Unique[j].Action = Action[i];
+        if(Action[i] == 'C' || Action[i] == 'T'){
+            Unique[j].Page = NULL;
         }
-        if(Action[i] == 'A'){
-            for(int j = 0; j < Unique_Proc; j++){
-                if(Unique[j].ID  == ID[i]){
-                    //Unique[j].Allocated = VPage[i]; *****DIS RIGHT HERE THE ISSUE MY GUY*****
-                }
-            }
+        else{
+            Unique[j].Page = VPage[i];
+        }
+        FIFO(Unique[j]);
+    }
+
+    cout << "PHYSICAL PAGE" << endl;
+    for(int i = 0; i < 20; i++){
+        cout << i << "\t \t \t";
+        if(Page[i] == -1){
+            cout << "FREE" << endl;
+        }else{
+            cout << Page[i] << endl;
         }
     }
 
-    int Page[20];
 
     return 0;
+}
+
+void FIFO(Process Proc){
+    for(int i = 0; i < 20; i++){
+        if(Page[i] == -1 && Proc.Action == 'A' && Proc.Page == (i + '0')){
+            Page[i] = Proc.ID;
+        }
+    }
 }
