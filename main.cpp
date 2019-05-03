@@ -11,9 +11,6 @@ struct Process{
     int *Allocated = new int [size];
 };
 
-
-void FIFO(int *ID, char *Action, char *VPage, int Page[20], int size);
-
 int main() {
     ifstream file("sample-jobs.dat");
 
@@ -65,7 +62,7 @@ int main() {
     }
 
     Process Unique[NumProcesses];
-
+    int Unique_Proc = 0;
     //Store unique processes
     for (int i=0; i<size; i++){
         // Check if the picked element is already printed
@@ -76,7 +73,8 @@ int main() {
             }
         // If not printed earlier, then print it
         if (i == j){
-            Unique->ID = ID[i];
+            Unique[Unique_Proc].ID = ID[i];
+            Unique_Proc++;
         }
     }
 
@@ -87,27 +85,4 @@ int main() {
     int Page[20];
 
     return 0;
-}
-
-void FIFO(int *ID, char *Action, char *VPage, int Page[20], int size){
-
-    for(int i = 0; i < 20; i++){
-        Page[i] = -1; //our integer null value equivalent
-    }
-
-    int FIFO = 0;
-    for(int i = 0; i < size; i++){
-
-    }
-
-    cout << "PHYSICAL PAGES" << endl;
-    for(int i = 0; i < 20; i++){
-        if(Page[i] == -1){
-            cout << i << "\t \t \t" << "FREE" << endl;
-        }
-        else{
-            cout << i << "\t \t \t" << *ID << endl;
-        }
-        *ID++;
-    }
 }
