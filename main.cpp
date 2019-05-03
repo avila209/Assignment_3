@@ -4,12 +4,14 @@
 using namespace std;
 int size = 0;
 int Page[20];
+int NumV = 1;
 
 struct Process{
     int ID = 0;
     bool Created = false;
     char Action = '\0';
     char Page = '\0';
+    char *Virtual = new char[NumV];
 };
 
 void FIFO(Process Proc);
@@ -101,6 +103,11 @@ int main() {
             Unique[j].Page = '\0';
             Unique[j].Created = true;
         }
+        else if(Action[i] == 'A'){
+            *(Unique[j].Virtual) = VPage[i];
+            *(Unique[j].Virtual)++;
+            Unique[j].Page = VPage[i];
+        }
         else if(Action[i] == 'T'){
             Unique[j].Page = '\0';
             Unique[j].Created = false;
@@ -121,6 +128,7 @@ int main() {
         }
     }
 
+    cout << *Unique[1].Virtual << endl;
 
     return 0;
 }
@@ -128,6 +136,8 @@ int main() {
 void FIFO(Process Proc){
     bool table_full = false;
     if(Proc.Action == 'A' && Proc.Created){ //Allocating a created process
+        *Proc.Virtual = Proc.Page;
+        NumV++;
         for(int i=0; i < 20; i++){
             if(Page[i] == -1){
                 Page[i] = Proc.ID;
