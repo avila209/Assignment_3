@@ -34,6 +34,7 @@ struct Swap_Page{
     Virtual_Page Process;
 };
 
+void FIFO(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int current_line, int NumofUniqueProcesses);
 
 int main() {
     Physical_Page PhysicalPage[20];
@@ -179,7 +180,7 @@ int main() {
                     VirtualPage[q].PT.modified[VPage[i]] = true;
                     VirtualPage[q].PT.present[VPage[i]] = true;
 
-                    if(VirtualPage[q].Allocated == false){
+                    if(!VirtualPage[q].Allocated){
                         VirtualPage[q].PT.VPage2 = new int[200];
                         VirtualPage[q].PT.PPage2 = new int[20];
                     }
@@ -358,9 +359,9 @@ int main() {
     if(Full){
         cout << "Page table is currently full, please enter the page replacement algorithm for the remaining table entries." << endl;
         //Menu goes here, Cin, all that good stuff.
+        //Need to decrement current_line before passing to functions
+        FIFO(VirtualPage, PhysicalPage, current_line-1, NumofUniqueProcesses);
     }
-
-
 
 
     cout << "PHYSICAL PAGE" << endl;
@@ -369,7 +370,7 @@ int main() {
         if(PhysicalPage[i].ID == -1){
             cout << "FREE" << endl;
         }else{
-            cout << PhysicalPage[i].ID << endl;
+            cout << PhysicalPage[i].ID << "    \t Precedence: " << PhysicalPage[i].Order << endl;
         }
     }
 
@@ -380,10 +381,10 @@ int main() {
         for(int x = 0; x < 200; x++){
             if(VirtualPage[i].PT.modified[x] && !VirtualPage[i].Killed){
                 if(VirtualPage[i].PT.present[x]){
-                    cout << "\t" << "Virtual Page: " << *(VirtualPage[i].PT.VPage2+x) << "\t Physical Page: " << *(VirtualPage[i].PT.PPage2+x) << endl;
+                    cout << "\t" << "Virtual Page: " << *(VirtualPage[i].PT.VPage2+x) << "   \t Physical Page: " << *(VirtualPage[i].PT.PPage2+x) << endl;
                 }
                 else{
-                    cout << "\t" << "Virtual Page: " << *(VirtualPage[i].PT.VPage2+x) << "\t Physical Page: " << "SWAP" << endl;
+                    cout << "\t" << "Virtual Page: " << *(VirtualPage[i].PT.VPage2+x) << "   \t Physical Page: " << "SWAP" << endl;
                 }
             }
         }
@@ -394,4 +395,12 @@ int main() {
     }
 
     return 0;
+}
+
+void FIFO(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int current_line, int NumofUniqueProcesses){
+    //Do something...
+
+
+
+
 }
