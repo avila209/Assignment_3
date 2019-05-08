@@ -6,11 +6,8 @@ int size = 0;
 
 struct Page_Table{
     bool modified[200];         //Determining factor for print function
-    int VPage[200];             //Virtual Page of process
-    int PPage[20];              //Physical Page of process
-
-    int *VPage2;
-    int *PPage2;
+    int *VPage2;                //Virtual Page of process
+    int *PPage2;                //Physical Page of process
 };
 
 struct Physical_Page{
@@ -165,8 +162,6 @@ int main() {
             for(int q = 0; q < NumofUniqueProcesses; q++){
                 if(VirtualPage[q].ID == ID[i] && VirtualPage[q].Created){
                     VirtualPage[q].PT.modified[VPage[i] - '0'] = true;
-                    VirtualPage[q].PT.VPage[VPage[i] - '0'] = VPage[i] - '0';
-                    VirtualPage[q].PT.PPage[VPage[i] - '0'] = pagenumber;
 
                     //New additions -- Pointers
                     VirtualPage[q].PT.VPage2 = new int[200];
@@ -270,7 +265,7 @@ int main() {
         cout << "Process: " << VirtualPage[i].ID << endl;
         for(int x = 0; x < 200; x++){
             if(VirtualPage[i].PT.modified[x]){
-                cout << "\t" << "Virtual Page: " << *(VirtualPage[i].PT.VPage+x) << "\t Physical Page: " << *(VirtualPage[i].PT.PPage+x) << endl;
+                cout << "\t" << "Virtual Page: " << *(VirtualPage[i].PT.VPage2+x) << "\t Physical Page: " << *(VirtualPage[i].PT.PPage2+x) << endl;
             }
         }
     }
