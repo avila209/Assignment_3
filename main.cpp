@@ -5,22 +5,28 @@ using namespace std;
 int size = 0;
 
 struct Page_Table{
-    bool modified[200];
+    bool modified[200];         //Determining factor for print function
     int VPage[200];             //Virtual Page of process
     int PPage[20];              //Physical Page of process
+
+    int *VPage2;
+    int *PPage2;
 };
 
 struct Physical_Page{
     int ID = 0;                 //Current process in the page
     bool Dirty = false;         //Modified
-    bool Protection = false;    //Read, Write, etc.
+    bool Read = false;          //Page has been read
+    bool Write = false;         //Page has been written to
     int Accessed = 0;           //Number of times accessed
 };
 
 struct Virtual_Page{
     int ID = 0;                 //Unique process identification number
-    int Pages[200];             //Large number of virtual pages per process
     Page_Table PT;              //Page translation table
+    bool Created = false;
+    bool Killed = false;
+    bool Terminated = false;
 };
 
 struct Swap_Page{
@@ -131,32 +137,118 @@ int main() {
 
     //*************** Load data into empty physical page table ****************************
     int pagenumber = 0, current_line = 0;
-    for(i = 0; i < size; i++){
+    for(i = 0; i <= size; i++){
+        //CHECK IF PAGE TABLE NOT FULL
+        for(int u = 0; u < 20; u++){
+            if(PhysicalPage[u].ID == -1){
+                pagenumber = u;
+                break;
+            }
+            if(u == 19){
+                cout << "Page Table is now full." << endl;
+                break;
+            }
+        }
+
         if(pagenumber == 20) {
             current_line = size + 1;
             break;
         }
+
+
+
+        //ALLOCATE
         if(Action[i] == 'A') {
             current_line = size + 1;
-            PhysicalPage[pagenumber].ID = ID[i]; //Need to add checker if already filled
-
+            bool created = false;
             //Search for virtual page with matching ID numbers.
             for(int q = 0; q < NumofUniqueProcesses; q++){
-                if(VirtualPage[q].ID == ID[i]){
+                if(VirtualPage[q].ID == ID[i] && VirtualPage[q].Created){
                     VirtualPage[q].PT.modified[VPage[i] - '0'] = true;
                     VirtualPage[q].PT.VPage[VPage[i] - '0'] = VPage[i] - '0';
                     VirtualPage[q].PT.PPage[VPage[i] - '0'] = pagenumber;
-                    VirtualPage[q].Pages[VPage[i] - '0'] = VPage[i] - '0';
+
+                    //New additions -- Pointers
+                    VirtualPage[q].PT.VPage2 = new int[200];
+                    VirtualPage[q].PT.PPage2 = new int[20];
+
+                    *(VirtualPage[q].PT.VPage2+VPage[i] - '0') = VPage[i] - '0';
+                    *(VirtualPage[q].PT.PPage2+VPage[i] - '0') = pagenumber;
 
                     cout << "Storing Virtual page: " << VPage[i] << " into Process: " << VirtualPage[q].ID << endl;
+                    created = true;
                 }
             }
-            pagenumber++;
+            if(created){
+                PhysicalPage[pagenumber].ID = ID[i]; //Need to add checker if already filled
+                PhysicalPage[pagenumber].Dirty = true;
+                pagenumber++;
+            }
         }
+
+        //CREATE
+        if(Action[i] == 'C'){
+            //Search for virtual page with matching ID numbers.
+            for(int q = 0; q < NumofUniqueProcesses; q++){
+                if(VirtualPage[q].ID == ID[i]){
+                    VirtualPage[q].Created = true;
+                    VirtualPage[q].Terminated = false;
+                    cout << "Creating Virtual Process: " << ID[i] << endl;
+                }
+            }
+        }
+
+        //TERMINATE
+        if(Action[i] == 'T'){
+            //Search for virtual page with matching ID numbers.
+            for(int q = 0; q < NumofUniqueProcesses; q++){
+
+                //Delete from page table where ID matches
+                for(int t = 0; t < 20; t++){
+                    if(PhysicalPage[t].ID == VirtualPage[q].ID){
+                        PhysicalPage[t].ID = -1; //free flag
+
+                        cout << "Removing " << VirtualPage[q].ID << " from " << t << endl;
+                    }
+                }
+
+
+                if(VirtualPage[q].ID == ID[i] && VirtualPage[q].Created){
+                    VirtualPage[q].Terminated = true;
+
+
+                    delete [] VirtualPage[q].PT.VPage2;
+                    delete [] VirtualPage[q].PT.PPage2;
+
+                    //Clear the modified flags
+                    for(int r = 0; r < 200; r++){
+                        VirtualPage[q].PT.modified[r] = false;
+                    }
+
+                    cout << "Terminating Virtual Process: " << ID[i] << endl;
+                }
+            }
+        }
+
+        //READ
+        if(Action[i] == 'R'){
+            //Search for virtual page with matching ID numbers.
+            for(int q = 0; q < NumofUniqueProcesses; q++){
+                if(VirtualPage[q].ID == ID[i] && VirtualPage[q].Created){
+                    //Read from page 1 of virtual process
+                    //Need to utilize the PT to find virtual to physical
+
+                    cout << "Reading from Virtual Page: " << VPage[i] << endl;
+                }
+            }
+        }
+
+
+
     }
     //*************** Finished loading into the physical table ****************************
 
-    cout << "Current line from the input file: " << current_line << "\n" << endl;
+    cout << "\n" << "Current line from the input file: " << current_line << "\n" << endl;
 
 
 
@@ -177,8 +269,8 @@ int main() {
     for(i = 0; i < NumofUniqueProcesses; i++){
         cout << "Process: " << VirtualPage[i].ID << endl;
         for(int x = 0; x < 200; x++){
-            if(VirtualPage[i].PT.modified[x] == true){
-                cout << "\t" << "Virtual Page: " << VirtualPage[i].PT.VPage[x] << "\t Physical Page: " << VirtualPage[i].PT.PPage[x] << endl;
+            if(VirtualPage[i].PT.modified[x]){
+                cout << "\t" << "Virtual Page: " << *(VirtualPage[i].PT.VPage+x) << "\t Physical Page: " << *(VirtualPage[i].PT.PPage+x) << endl;
             }
         }
     }
