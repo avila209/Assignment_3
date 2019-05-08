@@ -49,7 +49,6 @@ int main() {
     file.close();
 
     file.open("sample-jobs.dat");
-    size--;
 
     if(file.is_open()) cout << "File opened correctly." << endl;
     else cout << "Failed" << endl;
@@ -57,6 +56,9 @@ int main() {
     int ID [size];
     char Action [size];
     char VPage [size];
+    cout << "Size of arrays: " << size << endl;
+
+    size--;
 
     cout << "PID" << "\t" << "Act" << "\t" << "Page" << endl;
 
@@ -67,7 +69,9 @@ int main() {
         if(Action[i] == 'C' || Action[i] == 'T') VPage[i] = '\0';
         else file >> VPage[i];
 
-        cout << ID[i] << "\t" << Action[i] << "\t" << VPage[i] << endl;
+        if(i <= size){
+            cout << ID[i] << "\t" << Action[i] << "\t" << VPage[i] << endl;
+        }
         i++;
     }
 
@@ -75,7 +79,7 @@ int main() {
 
     int NumProcesses = 0;
     //Find all unique processes
-    for (int z=0; z<size; z++){
+    for (int z=0; z<=size; z++){
         // Check if the picked element is already printed
         int j;
         for (j=0; j<z; j++)
@@ -89,7 +93,7 @@ int main() {
     }
 
     int NumofUniqueProcesses = 0;
-    for (int k=0; k<size; k++){
+    for (int k=0; k<=size; k++){
         // Check if the picked element is already printed
         int j;
         for (j=0; j<k; j++)
@@ -104,7 +108,7 @@ int main() {
 
     int Unique_Processes[NumofUniqueProcesses];
     int count = 0;
-    for (int k=0; k<size; k++){
+    for (int k=0; k<=size; k++){
         // Check if the picked element is already printed
         int j;
         for (j=0; j<k; j++)
@@ -240,7 +244,7 @@ int main() {
                     //Read from page # of virtual process
                     //Need to utilize the PT to find virtual to physical
                     if(VPage[i] - '0' == *(VirtualPage[q].PT.VPage2 + VPage[i] - '0')){
-                        //Add write flag and increase accessed of physical page.
+                        //Add read flag and increase accessed of physical page.
                         P = *(VirtualPage[q].PT.PPage2 + VPage[i] - '0');
                         PhysicalPage[P].Read = true;
                         PhysicalPage[P].Accessed++;
@@ -249,6 +253,7 @@ int main() {
                     }
                     else{
                         //Kill the process
+                        cout << "Process killed while reading" << endl;
                         VirtualPage[q].Killed = true;
                         //Probably add a checker to see if the process has been killed before taking any actions.
                     }
@@ -260,14 +265,25 @@ int main() {
             //Search for virtual page with matching ID numbers.
             for(int q = 0; q < NumofUniqueProcesses; q++){
                 if(VirtualPage[q].ID == ID[i] && VirtualPage[q].Allocated){
-                    //Read from page 1 of virtual process
+                    int P;
                     //Need to utilize the PT to find virtual to physical
+                    if(VPage[i] - '0' == *(VirtualPage[q].PT.VPage2 + VPage[i] - '0')){
+                        //Add write flag and increase accessed of physical page.
+                        P = *(VirtualPage[q].PT.PPage2 + VPage[i] - '0');
+                        PhysicalPage[P].Write = true;
+                        PhysicalPage[P].Accessed++;
 
-                    cout << "Writing to Virtual Page: " << VPage[i] << endl;
+                        cout << "Wrote to Virtual Page: " << VPage[i] << " of Process: " << ID[i] << " Mapped to Physical Page: " << P << endl;
+                    }
+                    else{
+                        //Kill the process
+                        cout << "Process killed while writing" << endl;
+                        VirtualPage[q].Killed = true;
+                        //Probably add a checker to see if the process has been killed before taking any actions.
+                    }
                 }
             }
         }
-
     }
     //*************** Finished loading into the physical table ****************************
 
