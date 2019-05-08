@@ -6,19 +6,21 @@ int size = 0;
 int Page[20];
 
 struct Page_Table{
-    int VPage[200];
-    int PPage[20];
+    int VPage[200];             //Virtual Page of process
+    int PPage[20];              //Physical Page of process
 };
 
 struct Physical_Page{
-    int ID = 0;
-    bool Dirty;
+    int ID = 0;                 //Current process in the page
+    bool Dirty = false;         //Modified
+    bool Protection = false;    //Read, Write, etc.
+    int Accessed = 0;           //Number of times accessed
 };
 
 struct Virtual_Page{
-    int ID = 0;
-    int Pages[200];
-    Page_Table PT;
+    int ID = 0;                 //Unique process identification number
+    int Pages[200];             //Large number of virtual pages per process
+    Page_Table PT;              //Page translation table
 };
 
 
@@ -109,7 +111,7 @@ int main() {
 
     //Create a Virtual Page Table for each process
     Virtual_Page VirtualPage[NumofUniqueProcesses];
-    cout << "List of unique process numbers:" << endl;
+    cout << "List of unique process numbers: " << endl;
 
     for(i = 0; i < NumofUniqueProcesses; i++){
         VirtualPage->ID = Unique_Processes[i];
