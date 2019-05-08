@@ -3,7 +3,6 @@
 
 using namespace std;
 int size = 0;
-int Page[20];
 
 struct Page_Table{
     int VPage[200];             //Virtual Page of process
@@ -25,9 +24,10 @@ struct Virtual_Page{
 
 
 int main() {
+    Physical_Page PhysicalPage[20];
 
     for(int q = 0; q < 20; q++){
-        Page[q] = -1;
+        PhysicalPage[q].ID = -1;
     }
 
     ifstream file("sample-jobs.dat");
@@ -121,13 +121,27 @@ int main() {
     cout << "\n" << "Number of unique processes: " << NumofUniqueProcesses << "\n" << endl;
 
 
+    //*************** Load data into empty physical page table ****************************
+
+
+
+
+
+
+
+
+
+
+
+
+
     cout << "PHYSICAL PAGE" << endl;
     for(i = 0; i < 20; i++){
         cout << i << "\t \t \t";
-        if(Page[i] == -1){
+        if(PhysicalPage[i].ID == -1){
             cout << "FREE" << endl;
         }else{
-            cout << Page[i] << endl;
+            cout << PhysicalPage[i].ID << endl;
         }
     }
 
