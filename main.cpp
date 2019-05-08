@@ -5,23 +5,22 @@ using namespace std;
 int size = 0;
 int Page[20];
 
-struct Process{
-    int ID = 0;
-    bool Created = false;
-    char Action = '\0';
-    char Page = '\0';
-};
-
-struct Virtual_Page{
-    int Pages[200];
-};
-
 struct Page_Table{
     int VPage[200];
     int PPage[20];
 };
 
-void FIFO(Process Proc);
+struct Physical_Page{
+    int ID = 0;
+    bool Dirty;
+};
+
+struct Virtual_Page{
+    int ID = 0;
+    int Pages[200];
+    Page_Table PT;
+};
+
 
 int main() {
 
@@ -78,9 +77,7 @@ int main() {
         }
     }
 
-    Process Unique[NumProcesses];
-    int Unique_Proc = 0;
-    //Store unique processes
+    int NumofUniqueProcesses = 0;
     for (int k=0; k<size; k++){
         // Check if the picked element is already printed
         int j;
@@ -90,18 +87,36 @@ int main() {
             }
         // If not printed earlier, then print it
         if (k == j){
-            Unique[Unique_Proc].ID = ID[k];
-            Unique_Proc++;
+            NumofUniqueProcesses++;
         }
     }
 
-    for(i = 0; i < Unique_Proc; i++){
-        cout << Unique[i].ID << endl;
+    int Unique_Processes[NumofUniqueProcesses];
+    int count = 0;
+    for (int k=0; k<size; k++){
+        // Check if the picked element is already printed
+        int j;
+        for (j=0; j<k; j++)
+            if (ID[k] == ID[j]){
+                break;
+            }
+        // If not printed earlier, then print it
+        if (k == j){
+            Unique_Processes[count] = ID[k];
+            count++;
+        }
     }
 
+    //Create a Virtual Page Table for each process
+    Virtual_Page VirtualPage[NumofUniqueProcesses];
+    cout << "List of unique process numbers:" << endl;
 
+    for(i = 0; i < NumofUniqueProcesses; i++){
+        VirtualPage->ID = Unique_Processes[i];
+        cout << Unique_Processes[i] << endl;
+    }
 
-    cout << "\n" << "Number of unique processes: " << Unique_Proc << "\n" << endl;
+    cout << "\n" << "Number of unique processes: " << NumofUniqueProcesses << "\n" << endl;
 
 
     cout << "PHYSICAL PAGE" << endl;
