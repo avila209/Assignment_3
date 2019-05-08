@@ -134,7 +134,7 @@ int main() {
     cout << "\n" << "Number of unique processes: " << NumofUniqueProcesses << "\n" << endl;
 
     //*************** Load data into empty physical page table ****************************
-    int pagenumber = 0, current_line = 0;
+    int pagenumber = 0, current_line = 0; bool Full = false;
     for(i = 0; i <= size; i++){
         //CHECK IF PAGE TABLE NOT FULL
         for(int u = 0; u < 20; u++){
@@ -144,6 +144,7 @@ int main() {
             }
             if(u == 19){
                 cout << "Page Table is now full." << endl;
+                Full = true;
                 break;
             }
         }
@@ -204,7 +205,10 @@ int main() {
                 for(int t = 0; t < 20; t++){
                     if(PhysicalPage[t].ID == VirtualPage[q].ID){
                         PhysicalPage[t].ID = -1; //free flag
-
+                        PhysicalPage[t].Accessed = 0;
+                        PhysicalPage[t].Read = false;
+                        PhysicalPage[t].Write = false;
+                        PhysicalPage[t].Dirty = false;
                         cout << "Removing " << VirtualPage[q].ID << " from " << t << endl;
                     }
                 }
@@ -212,7 +216,7 @@ int main() {
 
                 if(VirtualPage[q].ID == ID[i] && VirtualPage[q].Created){
                     VirtualPage[q].Terminated = true;
-
+                    VirtualPage[q].Allocated = false;
 
                     delete [] VirtualPage[q].PT.VPage2;
                     delete [] VirtualPage[q].PT.PPage2;
@@ -227,26 +231,43 @@ int main() {
             }
         }
 
-        //READ
+        //READ - in progress
         if(Action[i] == 'R'){
             //Search for virtual page with matching ID numbers.
             for(int q = 0; q < NumofUniqueProcesses; q++){
-                if(VirtualPage[q].ID == ID[i] && VirtualPage[q].Created){
+                if(VirtualPage[q].ID == ID[i] && VirtualPage[q].Allocated){
                     //Read from page 1 of virtual process
                     //Need to utilize the PT to find virtual to physical
+                    if(VPage[i] == *(VirtualPage[q].PT.PPage2 + VPage[i] - '0')){
+                        //Add write flag and increase accessed of physical page.
+                    }
 
                     cout << "Reading from Virtual Page: " << VPage[i] << endl;
                 }
             }
         }
 
+        if(Action[i] == 'W'){
+            //Search for virtual page with matching ID numbers.
+            for(int q = 0; q < NumofUniqueProcesses; q++){
+                if(VirtualPage[q].ID == ID[i] && VirtualPage[q].Allocated){
+                    //Read from page 1 of virtual process
+                    //Need to utilize the PT to find virtual to physical
 
+                    cout << "Writing to Virtual Page: " << VPage[i] << endl;
+                }
+            }
+        }
 
     }
     //*************** Finished loading into the physical table ****************************
 
     cout << "\n" << "Current line from the input file: " << current_line << "\n" << endl;
 
+    if(Full){
+        cout << "Page table is currently full, please enter the page replacement algorithm for the remaining table entries." << endl;
+        //Menu goes here, Cin, all that good stuff.
+    }
 
 
 
