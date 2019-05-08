@@ -4,23 +4,29 @@
 using namespace std;
 int size = 0;
 int Page[20];
-int NumV = 1;
 
 struct Process{
     int ID = 0;
     bool Created = false;
     char Action = '\0';
     char Page = '\0';
-    char *Virtual = new char[NumV];
+};
+
+struct Virtual_Page{
+    int Pages[200];
+};
+
+struct Page_Table{
+    int VPage[200];
+    int PPage[20];
 };
 
 void FIFO(Process Proc);
 
 int main() {
-    int q = 0;
-    while(q < 20){
+
+    for(int q = 0; q < 20; q++){
         Page[q] = -1;
-        q++;
     }
 
     ifstream file("sample-jobs.dat");
@@ -93,30 +99,10 @@ int main() {
         cout << Unique[i].ID << endl;
     }
 
-    for(i = 0; i < size; i++){
-        int j = 0;
-        while(ID[i] != Unique[j].ID){
-            j++;
-        }
-        Unique[j].Action = Action[i];
-        if(Action[i] == 'C'){
-            Unique[j].Page = '\0';
-            Unique[j].Created = true;
-        }
-        else if(Action[i] == 'A'){
-            *(Unique[j].Virtual) = VPage[i];
-            *(Unique[j].Virtual)++;
-            Unique[j].Page = VPage[i];
-        }
-        else if(Action[i] == 'T'){
-            Unique[j].Page = '\0';
-            Unique[j].Created = false;
-        }
-        else{
-            Unique[j].Page = VPage[i];
-        }
-        FIFO(Unique[j]);
-    }
+
+
+    cout << "\n" << "Number of unique processes: " << Unique_Proc << "\n" << endl;
+
 
     cout << "PHYSICAL PAGE" << endl;
     for(i = 0; i < 20; i++){
@@ -128,39 +114,5 @@ int main() {
         }
     }
 
-    cout << *Unique[1].Virtual << endl;
-
     return 0;
-}
-
-void FIFO(Process Proc){
-    bool table_full = false;
-    if(Proc.Action == 'A' && Proc.Created){ //Allocating a created process
-        *Proc.Virtual = Proc.Page;
-        NumV++;
-        for(int i=0; i < 20; i++){
-            if(Page[i] == -1){
-                Page[i] = Proc.ID;
-                if(i == 19){
-                    table_full = true;
-                }
-                break;
-            }
-        }
-    }
-
-    if(Proc.Action == 'T'){
-        for(int i = 0; i < 20; i++){
-            if(Proc.ID = Page[i]){
-                Page[i] = -1;
-            }
-        }
-    }
-
-    if(table_full){
-        //swap these puppies
-    }
-
-    //Need to now make it if table is full
-
 }
