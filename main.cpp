@@ -22,6 +22,10 @@ struct Virtual_Page{
     Page_Table PT;              //Page translation table
 };
 
+struct Swap_Page{
+    Virtual_Page Process;
+};
+
 
 int main() {
     Physical_Page PhysicalPage[20];
@@ -120,14 +124,18 @@ int main() {
 
     cout << "\n" << "Number of unique processes: " << NumofUniqueProcesses << "\n" << endl;
 
-
     //*************** Load data into empty physical page table ****************************
-
-
-
-
-
-
+    int pagenumber = 0;
+    for(int i = 0; i < size; i++){
+        if(pagenumber == 20) {
+            break;
+        }
+        if(Action[i] == 'A') {
+            PhysicalPage[pagenumber].ID = ID[i];
+            pagenumber++;
+        }
+    }
+    //*************** Finished loading into the physical table ****************************
 
 
 
