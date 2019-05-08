@@ -16,7 +16,9 @@ struct Physical_Page{
     bool Dirty = false;         //Modified
     bool Read = false;          //Page has been read
     bool Write = false;         //Page has been written to
-    int Accessed = 0;           //Number of times accessed
+    int Accessed = 0;           //Number of times accessed - LRU
+
+    int Order = 0;              //Arrival time - FIFO
 };
 
 struct Virtual_Page{
@@ -185,6 +187,7 @@ int main() {
                     *(VirtualPage[q].PT.VPage2+VPage[i]) = VPage[i];
                     *(VirtualPage[q].PT.PPage2+VPage[i]) = pagenumber;
 
+
                     cout << "Storing Virtual page: " << VPage[i] << " into Process: " << VirtualPage[q].ID << endl;
                     created = true; VirtualPage[q].Allocated = true;
                 }
@@ -192,6 +195,7 @@ int main() {
             if(created){
                 PhysicalPage[pagenumber].ID = ID[i]; //Need to add checker if already filled
                 PhysicalPage[pagenumber].Dirty = true;
+                PhysicalPage[pagenumber].Order = i;  //Time of arrival during read process
                 pagenumber++;
             }
         }
