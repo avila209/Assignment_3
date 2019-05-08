@@ -24,6 +24,7 @@ struct Virtual_Page{
     bool Created = false;
     bool Killed = false;
     bool Terminated = false;
+    bool Allocated = false;
 };
 
 struct Swap_Page{
@@ -163,15 +164,16 @@ int main() {
                 if(VirtualPage[q].ID == ID[i] && VirtualPage[q].Created){
                     VirtualPage[q].PT.modified[VPage[i] - '0'] = true;
 
-                    //New additions -- Pointers
-                    VirtualPage[q].PT.VPage2 = new int[200];
-                    VirtualPage[q].PT.PPage2 = new int[20];
+                    if(VirtualPage[q].Allocated == false){
+                        VirtualPage[q].PT.VPage2 = new int[200];
+                        VirtualPage[q].PT.PPage2 = new int[20];
+                    }
 
                     *(VirtualPage[q].PT.VPage2+VPage[i] - '0') = VPage[i] - '0';
                     *(VirtualPage[q].PT.PPage2+VPage[i] - '0') = pagenumber;
 
                     cout << "Storing Virtual page: " << VPage[i] << " into Process: " << VirtualPage[q].ID << endl;
-                    created = true;
+                    created = true; VirtualPage[q].Allocated = true;
                 }
             }
             if(created){
