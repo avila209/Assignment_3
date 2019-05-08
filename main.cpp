@@ -231,18 +231,27 @@ int main() {
             }
         }
 
-        //READ - in progress
+        //READ -
         if(Action[i] == 'R'){
             //Search for virtual page with matching ID numbers.
             for(int q = 0; q < NumofUniqueProcesses; q++){
                 if(VirtualPage[q].ID == ID[i] && VirtualPage[q].Allocated){
-                    //Read from page 1 of virtual process
+                    int P;
+                    //Read from page # of virtual process
                     //Need to utilize the PT to find virtual to physical
-                    if(VPage[i] == *(VirtualPage[q].PT.PPage2 + VPage[i] - '0')){
+                    if(VPage[i] - '0' == *(VirtualPage[q].PT.VPage2 + VPage[i] - '0')){
                         //Add write flag and increase accessed of physical page.
-                    }
+                        P = *(VirtualPage[q].PT.PPage2 + VPage[i] - '0');
+                        PhysicalPage[P].Read = true;
+                        PhysicalPage[P].Accessed++;
 
-                    cout << "Reading from Virtual Page: " << VPage[i] << endl;
+                        cout << "Reading from Virtual Page: " << VPage[i] << " of Process: " << ID[i] << " Mapped to Physical Page: " << P << endl;
+                    }
+                    else{
+                        //Kill the process
+                        VirtualPage[q].Killed = true;
+                        //Probably add a checker to see if the process has been killed before taking any actions.
+                    }
                 }
             }
         }
@@ -287,9 +296,13 @@ int main() {
     for(i = 0; i < NumofUniqueProcesses; i++){
         cout << "Process: " << VirtualPage[i].ID << endl;
         for(int x = 0; x < 200; x++){
-            if(VirtualPage[i].PT.modified[x]){
+            if(VirtualPage[i].PT.modified[x] && !VirtualPage[i].Killed){
                 cout << "\t" << "Virtual Page: " << *(VirtualPage[i].PT.VPage2+x) << "\t Physical Page: " << *(VirtualPage[i].PT.PPage2+x) << endl;
             }
+        }
+
+        if(VirtualPage[i].Killed){
+            cout << "\tKILLED" << endl;
         }
     }
 
