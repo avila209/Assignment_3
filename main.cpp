@@ -238,20 +238,12 @@ int main() {
     cout << "SWAP" << endl;
     for(int i = 0; i < 200; i++){
         if(SwapPage[i].modified){
-            cout << "\t" << "Process: " << SwapPage[i].ID << "\t" << "Virtual Page: " << SwapPage[i].ID <<  endl;
+            cout << "\t" << "Process: " << SwapPage[i].ID << "\t" << "Virtual Page: " << SwapPage[i].VirtualPage <<  endl;
         }
     }
 
     return 0;
 }
-
-void FIFO(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int current_line, int NumofUniqueProcesses){
-
-
-}
-
-
-
 
 
 
@@ -285,47 +277,58 @@ void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page 
 
     else{
         //if(FIFO)
-        bool created = false;
         //Search for virtual page with matching ID numbers.
         for(int q = 0; q < NumofUniqueProcesses; q++){
             if(VirtualPage[q].ID == ID[i] && VirtualPage[q].Created){
-                VirtualPage[q].PT.modified[VPage[i]] = true;
-                VirtualPage[q].PT.present[VPage[i]] = true;
+                        VirtualPage[q].PT.modified[VPage[i]] = true;
+                        VirtualPage[q].PT.present[VPage[i]] = true;
 
-                if(!VirtualPage[q].Allocated){
-                    VirtualPage[q].PT.VPage2 = new int[200];
-                    VirtualPage[q].PT.PPage2 = new int[20];
-                }
+                        if(!VirtualPage[q].Allocated){
+                            VirtualPage[q].PT.VPage2 = new int[200];
+                            VirtualPage[q].PT.PPage2 = new int[20];
+                        }
 
-                VirtualPage[q].Allocated = true;
-                *(VirtualPage[q].PT.VPage2 + VPage[i]) = VPage[i];
-                //Need to find lowest precendence case and swap.
-                int minimum = 10000;
+                        VirtualPage[q].Allocated = true;
 
-                for(int k = 0; k < 20; k++){
-                    if(PhysicalPage[k].Order < minimum){
-                        minimum = PhysicalPage[k].Order;
-                        cout << "Minimum is: " << minimum << endl;
-                    }
-                }
-
-                for(int k = 0; k < 20; k++){ //Search through page table for lowest found precedence
-                    if(PhysicalPage[k].Order == minimum){
-                        //Send to swap
-                        for(int m = 0; m < 200; m++){
-                            if(*(VirtualPage[k].PT.PPage2 + m) == k){
-                                //Store the ID and Virtual page of the process
-                                SwapPage[k].ID = PhysicalPage[k].ID;
-                                SwapPage[k].VirtualPage = *(VirtualPage[k].PT.VPage2 + m);
-                                SwapPage[k].modified = true;
-
-                                //Clear the Physical page and present bit.
-                                *(VirtualPage[k].PT.PPage2 + m) = -1;
-                                VirtualPage[k].PT.present[m] = false;
+                        //Changing code
+                        *(VirtualPage[q].PT.VPage2 + VPage[i]) = VPage[i];
+                        //Need to find lowest precendence case and swap.
+                        int minimum = 10000;
+                        for(int k = 0; k < 20; k++){
+                            if(PhysicalPage[k].Order < minimum){
+                                minimum = PhysicalPage[k].Order;
+                                cout << "Minimum is: " << minimum << endl;
                             }
                         }
 
-                        *(VirtualPage[q].PT.VPage2+VPage[i]) = VPage[i];
+                        for(int k = 0; k < 20; k++) {
+                            if (PhysicalPage[k].Order == minimum) {
+                                int n; //stores the Process matching the lowest precedence physical page.
+                                for (n = 0; n < NumofUniqueProcesses; n++) {
+                                    if (VirtualPage[n].ID == PhysicalPage[k].ID) break;
+                                }
+
+                                int y; //stores the array location of virtual and physical page in TLB
+                                for (y = 0; y < 200; y++) {
+                                    if (*(VirtualPage[n].PT.PPage2 + y) == k) break;
+                                }
+
+                                //Store the matching virtual page and erase physical page in an unallocated swap
+                                for (int x = 0; x < 200; x++) {
+                                    if (!SwapPage[x].modified) {
+                                        SwapPage[x].ID = VirtualPage[n].ID;
+                                        SwapPage[x].VirtualPage = *(VirtualPage[n].PT.VPage2 + y); //**************************************
+                                        SwapPage[x].modified = true;
+
+                                        *(VirtualPage[n].PT.PPage2 + y) = -1;
+                                        VirtualPage[n].PT.present[y] = false;
+                                        break;
+                                        //Store new process into physical page
+                                    }
+                                }
+                            }
+                        }
+
                         for(int t = 0; t < 20; t++){
                             if(PhysicalPage[t].Order == minimum){
                                 PhysicalPage[t].ID = ID[i];
@@ -336,13 +339,10 @@ void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page 
                                 PhysicalPage[t].Order = i;
                             }
                         }
-                    }
-                }
-            }
+                        break;
+             }
         }
-
     }
-
 }
 
 
