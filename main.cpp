@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include "stdlib.h"
 
 using namespace std;
 int size = 0;
@@ -443,6 +444,68 @@ void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page 
                 break;
             }
         }
+    }
+
+    else if(Policy == 3){ //Random
+        //Search for virtual page with matching ID numbers.
+        for(int q = 0; q < NumofUniqueProcesses; q++){
+            if(VirtualPage[q].ID == ID[i] && VirtualPage[q].Created){
+                VirtualPage[q].PT.modified[VPage[i]] = true;
+                VirtualPage[q].PT.present[VPage[i]] = true;
+
+                if(!VirtualPage[q].Allocated){
+                    VirtualPage[q].PT.VPage2 = new int[200];
+                    VirtualPage[q].PT.PPage2 = new int[20];
+                }
+
+                VirtualPage[q].Allocated = true;
+
+                //Changing code
+                *(VirtualPage[q].PT.VPage2 + VPage[i]) = VPage[i];
+                //Need to find lowest precendence case and swap.
+                int k = rand() % 20;
+
+
+                        int n; //stores the Process matching random physical page
+                        for (n = 0; n < NumofUniqueProcesses; n++) {
+                            if (VirtualPage[n].ID == PhysicalPage[k].ID) break;
+                        }
+
+                        int y; //stores the array location of virtual and physical page in TLB
+                        for (y = 0; y < 200; y++) {
+                            if (*(VirtualPage[n].PT.PPage2 + y) == k && VirtualPage[n].PT.modified[y]) break;
+                        }
+
+                        //Store the matching virtual page and erase physical page in an unallocated swap
+                        for (int x = 0; x < 200; x++) {
+                            if (!SwapPage[x].modified) {
+                                SwapPage[x].ID = VirtualPage[n].ID;
+                                SwapPage[x].VirtualPage = *(VirtualPage[n].PT.VPage2 + y); //**************************************
+                                SwapPage[x].modified = true;
+
+                                *(VirtualPage[n].PT.PPage2 + y) = -1;
+                                VirtualPage[n].PT.present[y] = false;
+                                *(VirtualPage[q].PT.PPage2 + VPage[i]) = k;
+                                cout << "Y: " << y << endl;
+                                break;
+                                //Store new process into physical page
+                            }
+                        }
+                        // ******************************************************************** Might need to add taking out of swap when looping back again
+
+                        PhysicalPage[k].ID = ID[i];
+                        PhysicalPage[k].Write = false;
+                        PhysicalPage[k].Read = false;
+                        PhysicalPage[k].Accessed = 0;
+                        PhysicalPage[k].Dirty = true;
+                        PhysicalPage[k].Order = i;
+            }
+        }
+
+
+
+
+
     }
 }
 
