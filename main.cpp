@@ -36,6 +36,11 @@ struct Swap_Page{
 
 void FIFO(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int current_line, int NumofUniqueProcesses);
 
+
+
+void CREATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[], int i);
+void WRITE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[], int VPage[], int i);
+
 int main() {
     Physical_Page PhysicalPage[20];
 
@@ -201,13 +206,7 @@ int main() {
 
         //CREATE
         if(Action[i] == 'C'){
-            //Search for virtual page with matching ID numbers.
-            for(int q = 0; q < NumofUniqueProcesses; q++){
-                if(VirtualPage[q].ID == ID[i] && !VirtualPage[q].Killed){
-                    VirtualPage[q].Created = true;
-                    VirtualPage[q].Terminated = false;
-                }
-            }
+            CREATE(VirtualPage, PhysicalPage, NumofUniqueProcesses, ID, i);
         }
 
         //TERMINATE
@@ -292,49 +291,7 @@ int main() {
 
         //WRITE
         if(Action[i] == 'W'){
-            //Search for virtual page with matching ID numbers.
-            for(int q = 0; q < NumofUniqueProcesses; q++){
-                if(VirtualPage[q].ID == ID[i] && VirtualPage[q].Allocated){
-                    int P;
-                    //Need to utilize the PT to find virtual to physical
-                    if(VPage[i] == *(VirtualPage[q].PT.VPage2 + VPage[i])){
-                        //Add write flag and increase accessed of physical page.
-                        P = *(VirtualPage[q].PT.PPage2 + VPage[i]);
-                        PhysicalPage[P].Write = true;
-                        PhysicalPage[P].Accessed++;
-                    }
-                    else{
-                        //Kill the process
-                        //Delete from page table where ID matches
-                        for(int t = 0; t < 20; t++){
-                            if(PhysicalPage[t].ID == VirtualPage[q].ID){
-                                PhysicalPage[t].ID = -1; //free flag
-                                PhysicalPage[t].Accessed = 0;
-                                PhysicalPage[t].Read = false;
-                                PhysicalPage[t].Write = false;
-                                PhysicalPage[t].Dirty = false;
-                            }
-                        }
-
-
-                        if(VirtualPage[q].ID == ID[i] && VirtualPage[q].Created){
-                            VirtualPage[q].Terminated = true;
-                            VirtualPage[q].Allocated = false;
-
-                            delete [] VirtualPage[q].PT.VPage2;
-                            delete [] VirtualPage[q].PT.PPage2;
-
-                            //Clear the modified flags
-                            for(int r = 0; r < 200; r++){
-                                VirtualPage[q].PT.modified[r] = false;
-                            }
-                        }
-
-                        VirtualPage[q].Killed = true;
-                        //Probably add a checker to see if the process has been killed before taking any actions.
-                    }
-                }
-            }
+            WRITE(VirtualPage, PhysicalPage, NumofUniqueProcesses, ID, VPage, i);
         }
 
         //FREE
@@ -411,4 +368,60 @@ void FIFO(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int current_li
 
 
 
+}
+
+
+void CREATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[], int i){
+    //Search for virtual page with matching ID numbers.
+    for(int q = 0; q < NumofUniqueProcesses; q++){
+        if(VirtualPage[q].ID == ID[i] && !VirtualPage[q].Killed){
+            VirtualPage[q].Created = true;
+            VirtualPage[q].Terminated = false;
+        }
+    }
+}
+
+void WRITE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[], int VPage[], int i){
+    //Search for virtual page with matching ID numbers.
+    for(int q = 0; q < NumofUniqueProcesses; q++){
+        if(VirtualPage[q].ID == ID[i] && VirtualPage[q].Allocated){
+            int P;
+            //Need to utilize the PT to find virtual to physical
+            if(VPage[i] == *(VirtualPage[q].PT.VPage2 + VPage[i])){
+                //Add write flag and increase accessed of physical page.
+                P = *(VirtualPage[q].PT.PPage2 + VPage[i]);
+                PhysicalPage[P].Write = true;
+                PhysicalPage[P].Accessed++;
+            }
+            else{
+                //Kill the process
+                //Delete from page table where ID matches
+                for(int t = 0; t < 20; t++){
+                    if(PhysicalPage[t].ID == VirtualPage[q].ID){
+                        PhysicalPage[t].ID = -1; //free flag
+                        PhysicalPage[t].Accessed = 0;
+                        PhysicalPage[t].Read = false;
+                        PhysicalPage[t].Write = false;
+                        PhysicalPage[t].Dirty = false;
+                    }
+                }
+
+
+                if(VirtualPage[q].ID == ID[i] && VirtualPage[q].Created){
+                    VirtualPage[q].Terminated = true;
+                    VirtualPage[q].Allocated = false;
+
+                    delete [] VirtualPage[q].PT.VPage2;
+                    delete [] VirtualPage[q].PT.PPage2;
+
+                    //Clear the modified flags
+                    for(int r = 0; r < 200; r++){
+                        VirtualPage[q].PT.modified[r] = false;
+                    }
+                }
+
+                VirtualPage[q].Killed = true;
+            }
+        }
+    }
 }
