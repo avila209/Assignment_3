@@ -221,7 +221,7 @@ int main() {
         for(int x = 0; x < 200; x++){
             if(VirtualPage[i].PT.modified[x] && !VirtualPage[i].Killed){
                 if(VirtualPage[i].PT.present[x]){
-                    cout << "\t" << "Virtual Page: " << *(VirtualPage[i].PT.VPage2+x) << "   \t Physical Page: " << *(VirtualPage[i].PT.PPage2+x) << endl;
+                    cout << "\t" << "Virtual Page: " << *(VirtualPage[i].PT.VPage2+x) << "   \t Physical Page: " << *(VirtualPage[i].PT.PPage2+x)  << "\tX: " << x << endl;
                 }
                 else{
                     cout << "\t" << "Virtual Page: " << *(VirtualPage[i].PT.VPage2+x) << "   \t Physical Page: " << "SWAP" << endl;
@@ -310,8 +310,9 @@ void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page 
 
                                 int y; //stores the array location of virtual and physical page in TLB
                                 for (y = 0; y < 200; y++) {
-                                    if (*(VirtualPage[n].PT.PPage2 + y) == k) break;
+                                    if (*(VirtualPage[n].PT.PPage2 + y) == k && VirtualPage[n].PT.modified[y]) break;
                                 }
+                                cout << "N: " << n << endl;
 
                                 //Store the matching virtual page and erase physical page in an unallocated swap
                                 for (int x = 0; x < 200; x++) {
@@ -322,10 +323,13 @@ void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page 
 
                                         *(VirtualPage[n].PT.PPage2 + y) = -1;
                                         VirtualPage[n].PT.present[y] = false;
+                                        *(VirtualPage[q].PT.PPage2 + y) = y;
+                                        cout << "Y: " << y << endl;
                                         break;
                                         //Store new process into physical page
                                     }
                                 }
+                                break;
                             }
                         }
 
