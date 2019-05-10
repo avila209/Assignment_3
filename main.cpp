@@ -32,11 +32,11 @@ struct Virtual_Page{
 
 struct Swap_Page{
     int ID = 0;
-    Virtual_Page Process;
-    bool modified[200];
+    int VirtualPage;
+    bool modified = false;
 };
 
-void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int pagenumber, int ID[], int VPage[], int i, bool Full);
+void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page *SwapPage, int NumofUniqueProcesses, int pagenumber, int ID[], int VPage[], int i, bool Full);
 void READ(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[], int VPage[], int i, bool Full);
 void CREATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[], int i);
 void WRITE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[], int VPage[], int i, bool Full);
@@ -153,12 +153,6 @@ int main() {
         cout << VirtualPage[i].ID << endl;
     }
 
-    for(i = 0; i < 200; i++){
-        for(int q = 0; q < 200; q++){
-            SwapPage[i].modified[q] = false;
-        }
-    }
-
     cout << "\n" << "Number of unique processes: " << NumofUniqueProcesses << "\n" << endl;
 
     //*************** Load data into empty physical page table ****************************
@@ -180,7 +174,7 @@ int main() {
 
         //ALLOCATE
         if(Action[i] == 'A') {
-            ALLOCATE(VirtualPage, PhysicalPage, NumofUniqueProcesses, pagenumber, ID, VPage, i, Full);
+            ALLOCATE(VirtualPage, PhysicalPage, SwapPage, NumofUniqueProcesses, pagenumber, ID, VPage, i, Full);
         }
 
         //CREATE
@@ -240,6 +234,14 @@ int main() {
         }
     }
 
+    cout << endl;
+    cout << "SWAP" << endl;
+    for(int i = 0; i < 200; i++){
+        if(SwapPage[i].modified){
+            cout << "\t" << "Process: " << SwapPage[i].ID << "\t" << "Virtual Page: " << SwapPage[i].ID <<  endl;
+        }
+    }
+
     return 0;
 }
 
@@ -253,7 +255,7 @@ void FIFO(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int current_li
 
 
 
-void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int pagenumber, int ID[], int VPage[], int i, bool Full){
+void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page *SwapPage, int NumofUniqueProcesses, int pagenumber, int ID[], int VPage[], int i, bool Full){
     if(!Full){
         bool created = false;
         //Search for virtual page with matching ID numbers.
@@ -295,32 +297,49 @@ void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofU
                     VirtualPage[q].PT.PPage2 = new int[20];
                 }
 
-                *(VirtualPage[q].PT.VPage2+VPage[i]) = VPage[i];
+                VirtualPage[q].Allocated = true;
+                *(VirtualPage[q].PT.VPage2 + VPage[i]) = VPage[i];
                 //Need to find lowest precendence case and swap.
                 int minimum = 10000;
 
                 for(int k = 0; k < 20; k++){
                     if(PhysicalPage[k].Order < minimum){
                         minimum = PhysicalPage[k].Order;
+                        cout << "Minimum is: " << minimum << endl;
                     }
                 }
 
-                //save process where minimum to disk before swapping.
+                for(int k = 0; k < 20; k++){ //Search through page table for lowest found precedence
+                    if(PhysicalPage[k].Order == minimum){
+                        //Send to swap
+                        for(int m = 0; m < 200; m++){
+                            if(*(VirtualPage[k].PT.PPage2 + m) == k){
+                                //Store the ID and Virtual page of the process
+                                SwapPage[k].ID = PhysicalPage[k].ID;
+                                SwapPage[k].VirtualPage = *(VirtualPage[k].PT.VPage2 + m);
+                                SwapPage[k].modified = true;
 
-                //**************************************************************************************************************** Stopped right hereeee
+                                //Clear the Physical page and present bit.
+                                *(VirtualPage[k].PT.PPage2 + m) = -1;
+                                VirtualPage[k].PT.present[m] = false;
+                            }
+                        }
 
-                *(VirtualPage[q].PT.PPage2+VPage[i]) = pagenumber; // different
-
-                created = true; VirtualPage[q].Allocated = true;
+                        *(VirtualPage[q].PT.VPage2+VPage[i]) = VPage[i];
+                        for(int t = 0; t < 20; t++){
+                            if(PhysicalPage[t].Order == minimum){
+                                PhysicalPage[t].ID = ID[i];
+                                PhysicalPage[t].Write = false;
+                                PhysicalPage[t].Read = false;
+                                PhysicalPage[t].Accessed = 0;
+                                PhysicalPage[t].Dirty = true;
+                                PhysicalPage[t].Order = i;
+                            }
+                        }
+                    }
+                }
             }
         }
-        if(created){
-            PhysicalPage[pagenumber].ID = ID[i]; //Need to add checker if already filled
-            PhysicalPage[pagenumber].Dirty = true;
-            PhysicalPage[pagenumber].Order = i;  //Time of arrival during read process
-            pagenumber++;
-        }
-
 
     }
 
