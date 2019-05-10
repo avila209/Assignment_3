@@ -31,7 +31,9 @@ struct Virtual_Page{
 };
 
 struct Swap_Page{
+    int ID = 0;
     Virtual_Page Process;
+    bool modified[200];
 };
 
 void FIFO(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int current_line, int NumofUniqueProcesses);
@@ -140,6 +142,7 @@ int main() {
 
     //Create a Virtual Page Table for each process
     Virtual_Page VirtualPage[NumofUniqueProcesses];
+    Swap_Page SwapPage[200];
     cout << "List of unique process numbers: " << endl;
 
     for(i = 0; i < NumofUniqueProcesses; i++){
@@ -147,9 +150,15 @@ int main() {
         for(int k = 0; k < 200; k++){
             VirtualPage[i].PT.modified[k] = false;
             VirtualPage[i].PT.present[k] = false;
-        }
 
+        }
         cout << VirtualPage[i].ID << endl;
+    }
+
+    for(i = 0; i < 200; i++){
+        for(int q = 0; q < 200; q++){
+            SwapPage[i].modified[q] = false;
+        }
     }
 
     cout << "\n" << "Number of unique processes: " << NumofUniqueProcesses << "\n" << endl;
@@ -174,8 +183,6 @@ int main() {
             current_line = size + 1;
             break;
         }
-
-
 
         //ALLOCATE
         if(Action[i] == 'A') {
@@ -252,12 +259,14 @@ int main() {
 }
 
 void FIFO(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int current_line, int NumofUniqueProcesses){
-    //Do something...
-
-
 
 
 }
+
+
+
+
+
 
 void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int current_line, int NumofUniqueProcesses, int pagenumber, int ID[], int VPage[], int i){
     current_line = size + 1;
@@ -435,8 +444,8 @@ void FREE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqu
                 PhysicalPage[location].Read = false;
                 PhysicalPage[location].Write = false;
 
-                *(VirtualPage[q].PT.PPage2 + VPage[i]) = NULL;
-                *(VirtualPage[q].PT.VPage2 + VPage[i]) = NULL;
+                *(VirtualPage[q].PT.PPage2 + VPage[i]) = -1;
+                *(VirtualPage[q].PT.VPage2 + VPage[i]) = -1;
                 VirtualPage[q].PT.modified[VPage[i]] = false;
                 VirtualPage[q].PT.present[VPage[i]] = false;
             }
