@@ -36,8 +36,6 @@ struct Swap_Page{
     bool modified[200];
 };
 
-void FIFO(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int current_line, int NumofUniqueProcesses);
-
 void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int pagenumber, int ID[], int VPage[], int i, bool Full);
 void READ(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[], int VPage[], int i, bool Full);
 void CREATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[], int i);
@@ -164,7 +162,7 @@ int main() {
     cout << "\n" << "Number of unique processes: " << NumofUniqueProcesses << "\n" << endl;
 
     //*************** Load data into empty physical page table ****************************
-    int pagenumber = 0, current_line = 0; bool Full = false;
+    int pagenumber = 0; bool Full = false;
     for(i = 0; i <= size; i++){
         //CHECK IF PAGE TABLE NOT FULL
         for(int u = 0; u < 20; u++){
@@ -173,19 +171,11 @@ int main() {
                 break;
             }
 
-            /*
             if(u == 19){
                 cout << "Page Table is now full." << endl;
                 Full = true;
                 break;
             }
-
-             */
-        }
-
-        if(pagenumber == 20) {
-            current_line = size + 1;
-            break;
         }
 
         //ALLOCATE
@@ -218,15 +208,6 @@ int main() {
         }
     }
     //*************** Finished loading into the physical table ****************************
-
-    cout << "\n" << "Current line from the input file: " << current_line << "\n" << endl;
-
-    if(Full){
-        cout << "Page table is currently full, please enter the page replacement algorithm for the remaining table entries." << endl;
-        //Menu goes here, Cin, all that good stuff.
-        //Need to decrement current_line before passing to functions
-        FIFO(VirtualPage, PhysicalPage, current_line-1, NumofUniqueProcesses);
-    }
 
 
     cout << "PHYSICAL PAGE" << endl;
@@ -273,30 +254,64 @@ void FIFO(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int current_li
 
 
 void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int pagenumber, int ID[], int VPage[], int i, bool Full){
-    int current_line = size + 1;
-    bool created = false;
-    //Search for virtual page with matching ID numbers.
-    for(int q = 0; q < NumofUniqueProcesses; q++){
-        if(VirtualPage[q].ID == ID[i] && VirtualPage[q].Created){
-            VirtualPage[q].PT.modified[VPage[i]] = true;
-            VirtualPage[q].PT.present[VPage[i]] = true;
+    if(!Full){
+        bool created = false;
+        //Search for virtual page with matching ID numbers.
+        for(int q = 0; q < NumofUniqueProcesses; q++){
+            if(VirtualPage[q].ID == ID[i] && VirtualPage[q].Created){
+                VirtualPage[q].PT.modified[VPage[i]] = true;
+                VirtualPage[q].PT.present[VPage[i]] = true;
 
-            if(!VirtualPage[q].Allocated){
-                VirtualPage[q].PT.VPage2 = new int[200];
-                VirtualPage[q].PT.PPage2 = new int[20];
+                if(!VirtualPage[q].Allocated){
+                    VirtualPage[q].PT.VPage2 = new int[200];
+                    VirtualPage[q].PT.PPage2 = new int[20];
+                }
+
+                *(VirtualPage[q].PT.VPage2+VPage[i]) = VPage[i];
+                *(VirtualPage[q].PT.PPage2+VPage[i]) = pagenumber;
+
+                created = true; VirtualPage[q].Allocated = true;
             }
-
-            *(VirtualPage[q].PT.VPage2+VPage[i]) = VPage[i];
-            *(VirtualPage[q].PT.PPage2+VPage[i]) = pagenumber;
-
-            created = true; VirtualPage[q].Allocated = true;
+        }
+        if(created){
+            PhysicalPage[pagenumber].ID = ID[i]; //Need to add checker if already filled
+            PhysicalPage[pagenumber].Dirty = true;
+            PhysicalPage[pagenumber].Order = i;  //Time of arrival during read process
+            pagenumber++;
         }
     }
-    if(created){
-        PhysicalPage[pagenumber].ID = ID[i]; //Need to add checker if already filled
-        PhysicalPage[pagenumber].Dirty = true;
-        PhysicalPage[pagenumber].Order = i;  //Time of arrival during read process
-        pagenumber++;
+
+    else{
+        //if(FIFO)
+        bool created = false;
+        //Search for virtual page with matching ID numbers.
+        for(int q = 0; q < NumofUniqueProcesses; q++){
+            if(VirtualPage[q].ID == ID[i] && VirtualPage[q].Created){
+                VirtualPage[q].PT.modified[VPage[i]] = true;
+                VirtualPage[q].PT.present[VPage[i]] = true;
+
+                if(!VirtualPage[q].Allocated){
+                    VirtualPage[q].PT.VPage2 = new int[200];
+                    VirtualPage[q].PT.PPage2 = new int[20];
+                }
+
+                *(VirtualPage[q].PT.VPage2+VPage[i]) = VPage[i];
+                //Need to find lowest precendence case and swap.
+
+
+                *(VirtualPage[q].PT.PPage2+VPage[i]) = pagenumber; // different
+
+                created = true; VirtualPage[q].Allocated = true;
+            }
+        }
+        if(created){
+            PhysicalPage[pagenumber].ID = ID[i]; //Need to add checker if already filled
+            PhysicalPage[pagenumber].Dirty = true;
+            PhysicalPage[pagenumber].Order = i;  //Time of arrival during read process
+            pagenumber++;
+        }
+
+
     }
 
 }
@@ -407,7 +422,6 @@ void WRITE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniq
 
 
 void TERMINATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[],  int i) {
-
     //Search for virtual page with matching ID numbers.
     for (int q = 0; q < NumofUniqueProcesses; q++) {
 
