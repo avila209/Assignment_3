@@ -35,14 +35,13 @@ struct Swap_Page{
 };
 
 void FIFO(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int current_line, int NumofUniqueProcesses);
+
 void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int current_line, int NumofUniqueProcesses, int pagenumber, int ID[], int VPage[], int i);
 void READ(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[], int VPage[], int i);
-
-
 void CREATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[], int i);
 void WRITE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[], int VPage[], int i);
 void TERMINATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[],  int );
-void FREE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[],  int i, int VPage[size]);
+void FREE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[],  int i, int VPage[]);
 
 int main() {
     Physical_Page PhysicalPage[20];
@@ -188,7 +187,9 @@ int main() {
             CREATE(VirtualPage, PhysicalPage, NumofUniqueProcesses, ID, i);
         }
 
-        TERMINATE();
+        if(Action[i] == 'T'){
+            TERMINATE(VirtualPage, PhysicalPage, NumofUniqueProcesses, ID, i);
+        }
 
         //READ -
         if(Action[i] == 'R'){
@@ -201,7 +202,9 @@ int main() {
         }
 
         //FREE
-        FREE();
+        if(Action[i] == 'F'){
+            FREE(VirtualPage, PhysicalPage, NumofUniqueProcesses, ID, i, VPage);
+        }
     }
     //*************** Finished loading into the physical table ****************************
 
@@ -391,10 +394,10 @@ void WRITE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniq
 //TERMINATE
 void TERMINATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[],  int i) {
 
-//Search for virtual page with matching ID numbers.
+    //Search for virtual page with matching ID numbers.
     for (int q = 0; q < NumofUniqueProcesses; q++) {
 
-//Delete from page table where ID matches
+        //Delete from page table where ID matches
         for (int t = 0; t < 20; t++) {
             if (PhysicalPage[t].ID == VirtualPage[q].ID) {
                 PhysicalPage[t].ID = -1; //free flag
@@ -411,7 +414,7 @@ void TERMINATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int Numof
                 delete[] VirtualPage[q].PT.VPage2;
                 delete[] VirtualPage[q].PT.PPage2;
 
-//Clear the modified flags
+                //Clear the modified flags
                 for (int r = 0; r < 200; r++) {
                     VirtualPage[q].PT.modified[r] = false;
                 }
@@ -420,8 +423,7 @@ void TERMINATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int Numof
     }
 
 
-//Search for virtual page with matching ID numbers.
-void FREE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[],  int i, int VPage[size]) {
+void FREE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[],  int i, int VPage[]) {
     for (int q = 0; q < NumofUniqueProcesses; q++) {
         if (ID[i] == VirtualPage[q].ID) {
             int location;
