@@ -40,6 +40,8 @@ void FIFO(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int current_li
 
 void CREATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[], int i);
 void WRITE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[], int VPage[], int i);
+void TERMINATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[],  int );
+void FREE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[],  int i, int VPage[size]);
 
 int main() {
     Physical_Page PhysicalPage[20];
@@ -209,37 +211,7 @@ int main() {
             CREATE(VirtualPage, PhysicalPage, NumofUniqueProcesses, ID, i);
         }
 
-        //TERMINATE
-        if(Action[i] == 'T'){
-            //Search for virtual page with matching ID numbers.
-            for(int q = 0; q < NumofUniqueProcesses; q++){
-
-                //Delete from page table where ID matches
-                for(int t = 0; t < 20; t++){
-                    if(PhysicalPage[t].ID == VirtualPage[q].ID){
-                        PhysicalPage[t].ID = -1; //free flag
-                        PhysicalPage[t].Accessed = 0;
-                        PhysicalPage[t].Read = false;
-                        PhysicalPage[t].Write = false;
-                        PhysicalPage[t].Dirty = false;
-                    }
-                }
-
-
-                if(VirtualPage[q].ID == ID[i] && VirtualPage[q].Created){
-                    VirtualPage[q].Terminated = true;
-                    VirtualPage[q].Allocated = false;
-
-                    delete [] VirtualPage[q].PT.VPage2;
-                    delete [] VirtualPage[q].PT.PPage2;
-
-                    //Clear the modified flags
-                    for(int r = 0; r < 200; r++){
-                        VirtualPage[q].PT.modified[r] = false;
-                    }
-                }
-            }
-        }
+        TERMINATE();
 
         //READ -
         if(Action[i] == 'R'){
@@ -295,27 +267,7 @@ int main() {
         }
 
         //FREE
-        if(Action[i] == 'F'){
-            //Search for virtual page with matching ID numbers.
-            for(int q = 0; q < NumofUniqueProcesses; q++){
-                if(ID[i] == VirtualPage[q].ID){
-                    int location;
-                    location = *(VirtualPage[q].PT.PPage2 + VPage[i]);
-                    if(location != -1){
-                        PhysicalPage[location].ID = -1;
-                        PhysicalPage[location].Dirty = false;
-                        PhysicalPage[location].Order = 0;
-                        PhysicalPage[location].Read = false;
-                        PhysicalPage[location].Write = false;
-
-                        *(VirtualPage[q].PT.PPage2 + VPage[i]) = NULL;
-                        *(VirtualPage[q].PT.VPage2 + VPage[i]) = NULL;
-                        VirtualPage[q].PT.modified[VPage[i]] = false;
-                        VirtualPage[q].PT.present[VPage[i]] = false;
-                    }
-                }
-            }
-        }
+        FREE();
     }
     //*************** Finished loading into the physical table ****************************
 
@@ -421,6 +373,59 @@ void WRITE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniq
                 }
 
                 VirtualPage[q].Killed = true;
+            }
+        }
+    }
+}
+//TERMINATE
+void TERMINATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[],  int i) {
+
+//Search for virtual page with matching ID numbers.
+    for (int q = 0; q < NumofUniqueProcesses; q++) {
+
+//Delete from page table where ID matches
+        for (int t = 0; t < 20; t++) {
+            if (PhysicalPage[t].ID == VirtualPage[q].ID) {
+                PhysicalPage[t].ID = -1; //free flag
+                PhysicalPage[t].Accessed = 0;
+                PhysicalPage[t].Read = false;
+                PhysicalPage[t].Write = false;
+                PhysicalPage[t].Dirty = false;
+            }
+        }
+        if (VirtualPage[q].ID == ID[i] && VirtualPage[q].Created) {
+                VirtualPage[q].Terminated = true;
+                VirtualPage[q].Allocated = false;
+
+                delete[] VirtualPage[q].PT.VPage2;
+                delete[] VirtualPage[q].PT.PPage2;
+
+//Clear the modified flags
+                for (int r = 0; r < 200; r++) {
+                    VirtualPage[q].PT.modified[r] = false;
+                }
+            }
+        }
+    }
+
+
+//Search for virtual page with matching ID numbers.
+void FREE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[],  int i, int VPage[size]) {
+    for (int q = 0; q < NumofUniqueProcesses; q++) {
+        if (ID[i] == VirtualPage[q].ID) {
+            int location;
+            location = *(VirtualPage[q].PT.PPage2 + VPage[i]);
+            if (location != -1) {
+                PhysicalPage[location].ID = -1;
+                PhysicalPage[location].Dirty = false;
+                PhysicalPage[location].Order = 0;
+                PhysicalPage[location].Read = false;
+                PhysicalPage[location].Write = false;
+
+                *(VirtualPage[q].PT.PPage2 + VPage[i]) = NULL;
+                *(VirtualPage[q].PT.VPage2 + VPage[i]) = NULL;
+                VirtualPage[q].PT.modified[VPage[i]] = false;
+                VirtualPage[q].PT.present[VPage[i]] = false;
             }
         }
     }
