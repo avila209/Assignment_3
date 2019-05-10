@@ -297,7 +297,17 @@ void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofU
 
                 *(VirtualPage[q].PT.VPage2+VPage[i]) = VPage[i];
                 //Need to find lowest precendence case and swap.
+                int minimum = 10000;
 
+                for(int k = 0; k < 20; k++){
+                    if(PhysicalPage[k].Order < minimum){
+                        minimum = PhysicalPage[k].Order;
+                    }
+                }
+
+                //save process where minimum to disk before swapping.
+
+                //**************************************************************************************************************** Stopped right hereeee
 
                 *(VirtualPage[q].PT.PPage2+VPage[i]) = pagenumber; // different
 
