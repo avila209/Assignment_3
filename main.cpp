@@ -38,10 +38,10 @@ struct Swap_Page{
 
 void FIFO(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int current_line, int NumofUniqueProcesses);
 
-void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int current_line, int NumofUniqueProcesses, int pagenumber, int ID[], int VPage[], int i);
-void READ(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[], int VPage[], int i);
+void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int pagenumber, int ID[], int VPage[], int i, bool Full);
+void READ(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[], int VPage[], int i, bool Full);
 void CREATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[], int i);
-void WRITE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[], int VPage[], int i);
+void WRITE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[], int VPage[], int i, bool Full);
 void TERMINATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[],  int );
 void FREE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[],  int i, int VPage[]);
 
@@ -172,11 +172,15 @@ int main() {
                 pagenumber = u;
                 break;
             }
+
+            /*
             if(u == 19){
                 cout << "Page Table is now full." << endl;
                 Full = true;
                 break;
             }
+
+             */
         }
 
         if(pagenumber == 20) {
@@ -186,7 +190,7 @@ int main() {
 
         //ALLOCATE
         if(Action[i] == 'A') {
-            ALLOCATE(VirtualPage, PhysicalPage,current_line, NumofUniqueProcesses, pagenumber, ID, VPage,  i);
+            ALLOCATE(VirtualPage, PhysicalPage, NumofUniqueProcesses, pagenumber, ID, VPage, i, Full);
         }
 
         //CREATE
@@ -200,12 +204,12 @@ int main() {
 
         //READ -
         if(Action[i] == 'R'){
-            READ(VirtualPage, PhysicalPage, NumofUniqueProcesses,  ID, VPage, i);
+            READ(VirtualPage, PhysicalPage, NumofUniqueProcesses,  ID, VPage, i, Full);
         }
 
         //WRITE
         if(Action[i] == 'W'){
-            WRITE(VirtualPage, PhysicalPage, NumofUniqueProcesses, ID, VPage, i);
+            WRITE(VirtualPage, PhysicalPage, NumofUniqueProcesses, ID, VPage, i, Full);
         }
 
         //FREE
@@ -268,8 +272,8 @@ void FIFO(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int current_li
 
 
 
-void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int current_line, int NumofUniqueProcesses, int pagenumber, int ID[], int VPage[], int i){
-    current_line = size + 1;
+void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int pagenumber, int ID[], int VPage[], int i, bool Full){
+    int current_line = size + 1;
     bool created = false;
     //Search for virtual page with matching ID numbers.
     for(int q = 0; q < NumofUniqueProcesses; q++){
@@ -308,7 +312,7 @@ void CREATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUni
     }
 }
 
-void READ(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[], int VPage[], int i){
+void READ(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[], int VPage[], int i, bool Full){
     //Search for virtual page with matching ID numbers.
     for(int q = 0; q < NumofUniqueProcesses; q++){
         if(VirtualPage[q].ID == ID[i] && VirtualPage[q].Allocated){
@@ -356,7 +360,7 @@ void READ(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqu
 
 }
 
-void WRITE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[], int VPage[], int i){
+void WRITE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[], int VPage[], int i, bool Full){
     //Search for virtual page with matching ID numbers.
     for(int q = 0; q < NumofUniqueProcesses; q++){
         if(VirtualPage[q].ID == ID[i] && VirtualPage[q].Allocated){
@@ -400,7 +404,8 @@ void WRITE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniq
         }
     }
 }
-//TERMINATE
+
+
 void TERMINATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[],  int i) {
 
     //Search for virtual page with matching ID numbers.
@@ -430,7 +435,6 @@ void TERMINATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int Numof
             }
         }
     }
-
 
 void FREE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[],  int i, int VPage[]) {
     for (int q = 0; q < NumofUniqueProcesses; q++) {
