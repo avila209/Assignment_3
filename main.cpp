@@ -297,7 +297,6 @@ void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page 
                         for(int k = 0; k < 20; k++){
                             if(PhysicalPage[k].Order < minimum){
                                 minimum = PhysicalPage[k].Order;
-                                cout << "Minimum is: " << minimum << endl;
                             }
                         }
 
@@ -312,7 +311,6 @@ void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page 
                                 for (y = 0; y < 200; y++) {
                                     if (*(VirtualPage[n].PT.PPage2 + y) == k && VirtualPage[n].PT.modified[y]) break;
                                 }
-                                cout << "N: " << n << endl;
 
                                 //Store the matching virtual page and erase physical page in an unallocated swap
                                 for (int x = 0; x < 200; x++) {
