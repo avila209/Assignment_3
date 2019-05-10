@@ -188,8 +188,6 @@ int main() {
                     *(VirtualPage[q].PT.VPage2+VPage[i]) = VPage[i];
                     *(VirtualPage[q].PT.PPage2+VPage[i]) = pagenumber;
 
-
-                    cout << "Storing Virtual page: " << VPage[i] << " into Process: " << VirtualPage[q].ID << endl;
                     created = true; VirtualPage[q].Allocated = true;
                 }
             }
@@ -208,7 +206,6 @@ int main() {
                 if(VirtualPage[q].ID == ID[i] && !VirtualPage[q].Killed){
                     VirtualPage[q].Created = true;
                     VirtualPage[q].Terminated = false;
-                    cout << "Creating Virtual Process: " << ID[i] << endl;
                 }
             }
         }
@@ -226,7 +223,6 @@ int main() {
                         PhysicalPage[t].Read = false;
                         PhysicalPage[t].Write = false;
                         PhysicalPage[t].Dirty = false;
-                        cout << "Removing " << VirtualPage[q].ID << " from " << t << endl;
                     }
                 }
 
@@ -242,8 +238,6 @@ int main() {
                     for(int r = 0; r < 200; r++){
                         VirtualPage[q].PT.modified[r] = false;
                     }
-
-                    cout << "Terminating Virtual Process: " << ID[i] << endl;
                 }
             }
         }
@@ -253,16 +247,14 @@ int main() {
             //Search for virtual page with matching ID numbers.
             for(int q = 0; q < NumofUniqueProcesses; q++){
                 if(VirtualPage[q].ID == ID[i] && VirtualPage[q].Allocated){
-                    int P;
+                    int P = *(VirtualPage[q].PT.PPage2 + VPage[i]);
                     //Read from page # of virtual process
                     //Need to utilize the PT to find virtual to physical
-                    if(VPage[i] == *(VirtualPage[q].PT.VPage2 + VPage[i])){
+                    if(VPage[i] == *(VirtualPage[q].PT.VPage2 + VPage[i]) && PhysicalPage[P].Write){
                         //Add read flag and increase accessed of physical page.
                         P = *(VirtualPage[q].PT.PPage2 + VPage[i]);
                         PhysicalPage[P].Read = true;
                         PhysicalPage[P].Accessed++;
-
-                        cout << "Reading from Virtual Page: " << VPage[i] << " of Process: " << ID[i] << " Mapped to Physical Page: " << P << endl;
                     }
                     else{
                         //Kill the process
@@ -274,7 +266,6 @@ int main() {
                                 PhysicalPage[t].Read = false;
                                 PhysicalPage[t].Write = false;
                                 PhysicalPage[t].Dirty = false;
-                                cout << "Removing " << VirtualPage[q].ID << " from " << t << endl;
                             }
                         }
 
@@ -290,17 +281,16 @@ int main() {
                             for(int r = 0; r < 200; r++){
                                 VirtualPage[q].PT.modified[r] = false;
                             }
-
-                            cout << "Killing Virtual Process: " << ID[i] << endl;
                         }
 
+                        cout << "Attempted to read from a page that hasn't been written to, Process: " << VirtualPage[q].ID << endl;
                         VirtualPage[q].Killed = true;
-                        //Probably add a checker to see if the process has been killed before taking any actions.
                     }
                 }
             }
         }
 
+        //WRITE
         if(Action[i] == 'W'){
             //Search for virtual page with matching ID numbers.
             for(int q = 0; q < NumofUniqueProcesses; q++){
@@ -312,8 +302,6 @@ int main() {
                         P = *(VirtualPage[q].PT.PPage2 + VPage[i]);
                         PhysicalPage[P].Write = true;
                         PhysicalPage[P].Accessed++;
-
-                        cout << "Wrote to Virtual Page: " << VPage[i] << " of Process: " << ID[i] << " Mapped to Physical Page: " << P << endl;
                     }
                     else{
                         //Kill the process
@@ -325,7 +313,6 @@ int main() {
                                 PhysicalPage[t].Read = false;
                                 PhysicalPage[t].Write = false;
                                 PhysicalPage[t].Dirty = false;
-                                cout << "Removing " << VirtualPage[q].ID << " from " << t << endl;
                             }
                         }
 
@@ -341,12 +328,33 @@ int main() {
                             for(int r = 0; r < 200; r++){
                                 VirtualPage[q].PT.modified[r] = false;
                             }
-
-                            cout << "Killing Virtual Process: " << ID[i] << endl;
                         }
 
                         VirtualPage[q].Killed = true;
                         //Probably add a checker to see if the process has been killed before taking any actions.
+                    }
+                }
+            }
+        }
+
+        //FREE
+        if(Action[i] == 'F'){
+            //Search for virtual page with matching ID numbers.
+            for(int q = 0; q < NumofUniqueProcesses; q++){
+                if(ID[i] == VirtualPage[q].ID){
+                    int location;
+                    location = *(VirtualPage[q].PT.PPage2 + VPage[i]);
+                    if(location != -1){
+                        PhysicalPage[location].ID = -1;
+                        PhysicalPage[location].Dirty = false;
+                        PhysicalPage[location].Order = 0;
+                        PhysicalPage[location].Read = false;
+                        PhysicalPage[location].Write = false;
+
+                        *(VirtualPage[q].PT.PPage2 + VPage[i]) = NULL;
+                        *(VirtualPage[q].PT.VPage2 + VPage[i]) = NULL;
+                        VirtualPage[q].PT.modified[VPage[i]] = false;
+                        VirtualPage[q].PT.present[VPage[i]] = false;
                     }
                 }
             }
