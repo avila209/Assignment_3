@@ -312,6 +312,7 @@ void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page 
                     if(SwapPage[h].modified){
                         SwapPage[h].modified = false;
                         inSwap = true;
+                        break;
                     }
                 }
             }
@@ -450,6 +451,12 @@ void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page 
                                 SwapPage[x].VirtualPage = *(VirtualPage[n].PT.VPage2 + y); //**************************************
                                 SwapPage[x].modified = true;
 
+                                //Storing physical page flags in the swap list
+                                SwapPage[x].Order = PhysicalPage[k].Order;
+                                SwapPage[x].Read = PhysicalPage[k].Read;
+                                SwapPage[x].Write = PhysicalPage[k].Write;
+                                SwapPage[x].Accessesd = PhysicalPage[k].Accessed;
+
                                 *(VirtualPage[n].PT.PPage2 + y) = -1;
                                 VirtualPage[n].PT.present[y] = false;
                                 *(VirtualPage[q].PT.PPage2 + VPage[i]) = k;
@@ -516,6 +523,19 @@ void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page 
                 //Need to find lowest precendence case and swap.
                 int k = rand() % 20;
 
+                //if already in swap page list
+                bool inSwap = false;
+                int h;
+                for(h = 0; h < 200; h++){
+                    if(SwapPage[h].ID == ID[i] && SwapPage[h].VirtualPage == VPage[i]){
+                        if(SwapPage[h].modified){
+                            SwapPage[h].modified = false;
+                            inSwap = true;
+                            break;
+                        }
+                    }
+                }
+
 
                         int n; //stores the Process matching random physical page
                         for (n = 0; n < NumofUniqueProcesses; n++) {
@@ -534,6 +554,12 @@ void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page 
                                 SwapPage[x].VirtualPage = *(VirtualPage[n].PT.VPage2 + y); //**************************************
                                 SwapPage[x].modified = true;
 
+                                //Storing physical page flags in the swap list
+                                SwapPage[x].Order = PhysicalPage[k].Order;
+                                SwapPage[x].Read = PhysicalPage[k].Read;
+                                SwapPage[x].Write = PhysicalPage[k].Write;
+                                SwapPage[x].Accessesd = PhysicalPage[k].Accessed;
+
                                 *(VirtualPage[n].PT.PPage2 + y) = -1;
                                 VirtualPage[n].PT.present[y] = false;
                                 *(VirtualPage[q].PT.PPage2 + VPage[i]) = k;
@@ -544,12 +570,22 @@ void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page 
                         }
                         // ******************************************************************** Might need to add taking out of swap when looping back again
 
-                        PhysicalPage[k].ID = ID[i];
-                        PhysicalPage[k].Write = false;
-                        PhysicalPage[k].Read = false;
-                        PhysicalPage[k].Accessed = 0;
-                        PhysicalPage[k].Dirty = true;
-                        PhysicalPage[k].Order = i;
+                        if(!inSwap){
+                            PhysicalPage[k].ID = ID[i];
+                            PhysicalPage[k].Write = false;
+                            PhysicalPage[k].Read = false;
+                            PhysicalPage[k].Accessed = 0;
+                            PhysicalPage[k].Dirty = true;
+                            PhysicalPage[k].Order = i;
+                        }
+                        else if(inSwap){
+                            PhysicalPage[k].ID = ID[i];
+                            PhysicalPage[k].Write = SwapPage[h].Write;
+                            PhysicalPage[k].Read = SwapPage[h].Read;
+                            PhysicalPage[k].Accessed = SwapPage[h].Accessesd;
+                            PhysicalPage[k].Dirty = true;
+                            PhysicalPage[k].Order = SwapPage[h].Order;
+                        }
             }
         }
 
