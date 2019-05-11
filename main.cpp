@@ -263,7 +263,6 @@ int main() {
 }
 
 
-
 void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page *SwapPage, int NumofUniqueProcesses, int pagenumber, int ID[], int VPage[], int i, bool Full, int Policy){
     if(!Full){
         bool created = false;
