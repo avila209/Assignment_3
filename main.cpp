@@ -407,7 +407,7 @@ void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page 
     //Use loop to find least recently accessed instead of lowest precedence
         //Search for virtual page with matching ID numbers.
         for(int q = 0; q < NumofUniqueProcesses; q++){
-
+            int h ;
 
             if(VirtualPage[q].ID == ID[i] && VirtualPage[q].Created){
                 VirtualPage[q].PT.modified[VPage[i]] = true;
@@ -430,6 +430,7 @@ void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page 
                     }
                 }
 
+                bool inSwap = false;
                 for(int k = 0; k < 20; k++) {
                     if (PhysicalPage[k].Accessed == minimum) {
                         int n; //stores the Process matching the lowest precedence physical page.
@@ -458,11 +459,11 @@ void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page 
                             }
                         }
 
-                        for(int x = 0; x < 200; x++){
+                        for(h = 0; h < 200; h++){
                             //**************************************************************************** Add method to take process out of swap if in swap.
-                            if(SwapPage[x].modified && SwapPage[x].ID == ID[i] && SwapPage[x].VirtualPage == VPage[i]){
-                                SwapPage[x].modified = false;
-                                cout << "found one" << endl;
+                            if(SwapPage[h].modified && SwapPage[h].ID == ID[i] && SwapPage[h].VirtualPage == VPage[i]){
+                                SwapPage[h].modified = false;
+                                inSwap = true;
                                 break;
                             }
                         }
@@ -472,13 +473,22 @@ void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page 
                 }
 
                 for(int t = 0; t < 20; t++){
-                    if(PhysicalPage[t].Accessed == minimum){
+                    if(PhysicalPage[t].Accessed == minimum && !inSwap){
                         PhysicalPage[t].ID = ID[i];
                         PhysicalPage[t].Write = false;
                         PhysicalPage[t].Read = false;
                         PhysicalPage[t].Accessed = 0;
                         PhysicalPage[t].Dirty = true;
                         PhysicalPage[t].Order = i;
+                        break;
+                    }
+                    else if(PhysicalPage[t].Order == minimum && inSwap){
+                        PhysicalPage[t].ID = ID[i];
+                        PhysicalPage[t].Write = SwapPage[h].Write;
+                        PhysicalPage[t].Read = SwapPage[h].Read;
+                        PhysicalPage[t].Accessed = SwapPage[h].Accessesd;
+                        PhysicalPage[t].Dirty = true;
+                        PhysicalPage[t].Order = SwapPage[h].Order;
                         break;
                     }
                 }
