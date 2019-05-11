@@ -35,6 +35,10 @@ struct Swap_Page{
     int ID = 0;
     int VirtualPage;
     bool modified = false;
+    bool Write = false;
+    bool Read = false;
+    int Accessesd = 0;
+    int Order = 0;
 };
 
 void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page *SwapPage, int NumofUniqueProcesses, int pagenumber, int ID[], int VPage[], int i, bool Full, int Policy);
@@ -294,6 +298,7 @@ void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page 
         }
     }
 
+
     else if(Policy == 1){ //FIFO
         //Search for virtual page with matching ID numbers.
         for(int q = 0; q < NumofUniqueProcesses; q++){
@@ -349,6 +354,12 @@ void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page 
                                         SwapPage[x].ID = VirtualPage[n].ID;
                                         SwapPage[x].VirtualPage = *(VirtualPage[n].PT.VPage2 + y); //**************************************
                                         SwapPage[x].modified = true;
+
+                                        //Storing physical page flags in the swap list
+                                        SwapPage[x].Order = PhysicalPage[k].Order;
+                                        SwapPage[x].Read = PhysicalPage[k].Read;
+                                        SwapPage[x].Write = PhysicalPage[k].Write;
+                                        SwapPage[x].Accessesd = PhysicalPage[k].Accessed;
 
                                         *(VirtualPage[n].PT.PPage2 + y) = -1;
                                         VirtualPage[n].PT.present[y] = false;
