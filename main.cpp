@@ -269,6 +269,9 @@ void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page 
         //Search for virtual page with matching ID numbers.
         for(int q = 0; q < NumofUniqueProcesses; q++){
             if(VirtualPage[q].ID == ID[i] && VirtualPage[q].Created){
+
+
+
                 VirtualPage[q].PT.modified[VPage[i]] = true;
                 VirtualPage[q].PT.present[VPage[i]] = true;
 
@@ -294,9 +297,22 @@ void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page 
     else if(Policy == 1){ //FIFO
         //Search for virtual page with matching ID numbers.
         for(int q = 0; q < NumofUniqueProcesses; q++){
+
+
+            //if already in swap page list
+            for(int h = 0; h < 200; h++){
+                if(SwapPage[h].ID == ID[i] && SwapPage[h].VirtualPage == VPage[i]){
+                    if(SwapPage[h].modified){
+                        SwapPage[h].modified = false;
+                    }
+                }
+            }
+
             if(VirtualPage[q].ID == ID[i] && VirtualPage[q].Created){
                         VirtualPage[q].PT.modified[VPage[i]] = true;
                         VirtualPage[q].PT.present[VPage[i]] = true;
+
+
 
                         if(!VirtualPage[q].Allocated){
                             VirtualPage[q].PT.VPage2 = new int[200];
@@ -344,6 +360,8 @@ void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page 
                                 }
                                 // ******************************************************************** Might need to add taking out of swap when looping back again
 
+
+
                                 break;
                             }
                         }
@@ -367,6 +385,8 @@ void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page 
     //Use loop to find least recently accessed instead of lowest precedence
         //Search for virtual page with matching ID numbers.
         for(int q = 0; q < NumofUniqueProcesses; q++){
+
+
             if(VirtualPage[q].ID == ID[i] && VirtualPage[q].Created){
                 VirtualPage[q].PT.modified[VPage[i]] = true;
                 VirtualPage[q].PT.present[VPage[i]] = true;
