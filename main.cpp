@@ -305,10 +305,13 @@ void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page 
 
 
             //if already in swap page list
-            for(int h = 0; h < 200; h++){
+            bool inSwap = false;
+            int h;
+            for(h = 0; h < 200; h++){
                 if(SwapPage[h].ID == ID[i] && SwapPage[h].VirtualPage == VPage[i]){
                     if(SwapPage[h].modified){
                         SwapPage[h].modified = false;
+                        inSwap = true;
                     }
                 }
             }
@@ -378,13 +381,21 @@ void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page 
                         }
 
                         for(int t = 0; t < 20; t++){
-                            if(PhysicalPage[t].Order == minimum){
+                            if(PhysicalPage[t].Order == minimum && !inSwap){
                                 PhysicalPage[t].ID = ID[i];
                                 PhysicalPage[t].Write = false;
                                 PhysicalPage[t].Read = false;
                                 PhysicalPage[t].Accessed = 0;
                                 PhysicalPage[t].Dirty = true;
                                 PhysicalPage[t].Order = i;
+                            }
+                            else if(PhysicalPage[t].Order == minimum && inSwap){
+                                PhysicalPage[t].ID = ID[i];
+                                PhysicalPage[t].Write = SwapPage[h].Write;
+                                PhysicalPage[t].Read = SwapPage[h].Read;
+                                PhysicalPage[t].Accessed = SwapPage[h].Accessesd;
+                                PhysicalPage[t].Dirty = true;
+                                PhysicalPage[t].Order = SwapPage[h].Order;
                             }
                         }
                         break;
