@@ -207,9 +207,18 @@ int main() {
             TERMINATE(VirtualPage, PhysicalPage, NumofUniqueProcesses, ID, i);
         }
 
-        //READ -
+        //READ
         if(Action[i] == 'R'){
-            READ(VirtualPage, PhysicalPage, NumofUniqueProcesses,  ID, VPage, i, Full);
+            //if Virtual Page is present, just read. else if not present, allocate then read.
+            for(int q = 0; q < NumofUniqueProcesses; q++) {
+                if (VirtualPage[q].ID == ID[i] && VirtualPage[q].PT.present) {
+                    READ(VirtualPage, PhysicalPage, NumofUniqueProcesses,  ID, VPage, i, Full);
+                }
+                else if(VirtualPage[q].ID == ID[i] && VirtualPage[q].PT.present){
+                    ALLOCATE(VirtualPage, PhysicalPage, SwapPage, NumofUniqueProcesses, pagenumber, ID, VPage, i, Full, Policy);
+                    READ(VirtualPage, PhysicalPage, NumofUniqueProcesses,  ID, VPage, i, Full);
+                }
+            }
         }
 
         //WRITE
@@ -619,7 +628,8 @@ void READ(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqu
                 P = *(VirtualPage[q].PT.PPage2 + VPage[i]);
                 PhysicalPage[P].Read = true;
                 PhysicalPage[P].Accessed++;
-            } else {
+            }
+            else {
                 //Kill the process
                 //Delete from page table where ID matches
                 for (int t = 0; t < 20; t++) {
