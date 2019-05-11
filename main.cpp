@@ -209,16 +209,7 @@ int main() {
 
         //READ
         if(Action[i] == 'R'){
-            //if Virtual Page is present, just read. else if not present, allocate then read.
-            for(int q = 0; q < NumofUniqueProcesses; q++) {
-                if (VirtualPage[q].ID == ID[i] && VirtualPage[q].PT.present) {
-                    READ(VirtualPage, PhysicalPage, NumofUniqueProcesses,  ID, VPage, i, Full);
-                }
-                else if(VirtualPage[q].ID == ID[i] && VirtualPage[q].PT.present){
-                    ALLOCATE(VirtualPage, PhysicalPage, SwapPage, NumofUniqueProcesses, pagenumber, ID, VPage, i, Full, Policy);
-                    READ(VirtualPage, PhysicalPage, NumofUniqueProcesses,  ID, VPage, i, Full);
-                }
-            }
+            READ(VirtualPage, PhysicalPage, NumofUniqueProcesses,  ID, VPage, i, Full);
         }
 
         //WRITE
