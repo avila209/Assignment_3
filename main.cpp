@@ -209,6 +209,20 @@ int main() {
 
         //READ
         if(Action[i] == 'R'){
+            //Check if page is swapped out
+
+            for(int t = 0; t < NumofUniqueProcesses; t++) {
+                if(VirtualPage[t].ID == ID[i] && !VirtualPage[t].PT.present[VPage[i]]) {
+                    cout << "Attempting to read from file currently in the swap, i = " << i << "Process: " << ID[i] << endl;
+                    ALLOCATE(VirtualPage, PhysicalPage, SwapPage, NumofUniqueProcesses, pagenumber, ID, VPage, i, Full, Policy);
+                    break;
+                }
+                else{
+                    cout << "Its all good in the hood" << endl;
+                    break;
+                }
+            }
+
             READ(VirtualPage, PhysicalPage, NumofUniqueProcesses,  ID, VPage, i, Full);
         }
 
@@ -614,12 +628,17 @@ void READ(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqu
             int P = *(VirtualPage[q].PT.PPage2 + VPage[i]);
             //Read from page # of virtual process
             //Need to utilize the PT to find virtual to physical
-            if (VPage[i] == *(VirtualPage[q].PT.VPage2 + VPage[i]) && PhysicalPage[P].Write) {
+            if (VPage[i] == *(VirtualPage[q].PT.VPage2 + VPage[i]) && PhysicalPage[P].Write) {  //in physical page
                 //Add read flag and increase accessed of physical page.
                 P = *(VirtualPage[q].PT.PPage2 + VPage[i]);
                 PhysicalPage[P].Read = true;
                 PhysicalPage[P].Accessed++;
             }
+
+            else if (VPage[i] == *(VirtualPage[q].PT.VPage2 + VPage[i]) && VirtualPage[q].PT.present[VPage[i]]){ //in virtual page
+
+            }
+
             else {
                 //Kill the process
                 //Delete from page table where ID matches
@@ -647,8 +666,7 @@ void READ(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqu
                     }
                 }
 
-                cout << "Attempted to read from a page that hasn't been written to, Process: " << VirtualPage[q].ID
-                     << endl;
+                cout << "Attempted to read from a page that hasn't been written to,  i = " << i << " Process: " << ID[i] << endl;
                 VirtualPage[q].Killed = true;
             }
         }
