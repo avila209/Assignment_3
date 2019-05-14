@@ -72,7 +72,6 @@ int main() {
     int ID [size];
     char Action [size];
     int VPage [size];
-    cout << "Size of arrays: " << size << endl;
 
     size--;
 
@@ -112,7 +111,7 @@ int main() {
         }
     }
 
-
+    cout << endl;
 
     int NumProcesses = 0;
     //Find all unique processes
@@ -162,7 +161,6 @@ int main() {
     //Create a Virtual Page Table for each process
     Virtual_Page VirtualPage[NumofUniqueProcesses];
     Swap_Page SwapPage[200];
-    cout << "List of unique process numbers: " << endl;
 
     for(i = 0; i < NumofUniqueProcesses; i++){
         VirtualPage[i].ID = Unique_Processes[i];
@@ -171,10 +169,7 @@ int main() {
             VirtualPage[i].PT.present[k] = false;
 
         }
-        cout << VirtualPage[i].ID << endl;
     }
-
-    cout << "\n" << "Number of unique processes: " << NumofUniqueProcesses << "\n" << endl;
 
     //*************** Load data into empty physical page table ****************************
     int pagenumber = 0; bool Full = false;
@@ -246,8 +241,6 @@ int main() {
         if(Action[i] == 'F'){
             FREE(VirtualPage, PhysicalPage, NumofUniqueProcesses, ID, i, VPage);
         }
-
-        cout << i << endl;
     }
     //*************** Finished loading into the physical table ****************************
 
@@ -258,7 +251,7 @@ int main() {
         if(PhysicalPage[i].ID == -1){
             cout << "FREE" << endl;
         }else{
-            cout << PhysicalPage[i].ID << "    \t Precedence: " << PhysicalPage[i].Order << "    \t Accessed: " << PhysicalPage[i].Accessed << endl;
+            cout << PhysicalPage[i].ID << endl;
         }
     }
 
@@ -269,7 +262,7 @@ int main() {
         for(int x = 0; x < 200; x++){
             if(VirtualPage[i].PT.modified[x] && !VirtualPage[i].Killed){
                 if(VirtualPage[i].PT.present[x]){
-                    cout << "\t" << "Virtual Page: " << *(VirtualPage[i].PT.VPage2+x) << "   \t Physical Page: " << *(VirtualPage[i].PT.PPage2+x)  << "\tX: " << x << endl;
+                    cout << "\t" << "Virtual Page: " << *(VirtualPage[i].PT.VPage2+x) << "   \t Physical Page: " << *(VirtualPage[i].PT.PPage2+x) << endl;
                 }
                 else{
                     cout << "\t" << "Virtual Page: " << *(VirtualPage[i].PT.VPage2+x) << "   \t Physical Page: " << "SWAP" << endl;
