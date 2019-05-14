@@ -187,7 +187,6 @@ int main() {
             }
 
             if(u == 19){
-                cout << "Page Table is now full." << endl;
                 Full = true;
                 break;
             }
@@ -476,7 +475,6 @@ void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page 
                                 *(VirtualPage[n].PT.PPage2 + y) = -1;
                                 VirtualPage[n].PT.present[y] = false;
                                 *(VirtualPage[q].PT.PPage2 + VPage[i]) = k;
-                                cout << "Y: " << y << endl;
                                 break;
                                 //Store new process into physical page
                             }
@@ -565,7 +563,6 @@ void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page 
                                 *(VirtualPage[n].PT.PPage2 + y) = -1;
                                 VirtualPage[n].PT.present[y] = false;
                                 *(VirtualPage[q].PT.PPage2 + VPage[i]) = k;
-                                cout << "Y: " << y << endl;
                                 break;
                                 //Store new process into physical page
                             }
@@ -603,11 +600,6 @@ void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page 
                         }
             }
         }
-
-
-
-
-
     }
 }
 
