@@ -210,23 +210,12 @@ int main() {
         //READ
         if(Action[i] == 'R'){
             //Check if page is swapped out
-
             for(int t = 0; t < NumofUniqueProcesses; t++) {
                 if(VirtualPage[t].ID == ID[i] && !VirtualPage[t].PT.present[VPage[i]]) {
-                    cout << "Attempting to read from file currently in the swap, i = " << i << "Process: " << ID[i] << endl;
-
-                    for(int d = 0; d < 200; d++){
-                        if(SwapPage[d].ID == ID[i] && SwapPage[d].VirtualPage == VPage[i]){
-                            cout << "Process: " << ID[i] << ", Write: " << SwapPage[d].Write << ", Order: " << SwapPage[d].Order
-                            << ", Accessed: " << SwapPage[d].Accessesd << endl;
-                        }
-                    }
-
                     ALLOCATE(VirtualPage, PhysicalPage, SwapPage, NumofUniqueProcesses, pagenumber, ID, VPage, i, Full, Policy);
                     break;
                 }
                 else{
-                    cout << "Its all good in the hood" << endl;
                     break;
                 }
             }
@@ -236,6 +225,17 @@ int main() {
 
         //WRITE
         if(Action[i] == 'W'){
+            //Check if page is swapped out
+            for(int t = 0; t < NumofUniqueProcesses; t++) {
+                if(VirtualPage[t].ID == ID[i] && !VirtualPage[t].PT.present[VPage[i]]) {
+                    ALLOCATE(VirtualPage, PhysicalPage, SwapPage, NumofUniqueProcesses, pagenumber, ID, VPage, i, Full, Policy);
+                    break;
+                }
+                else{
+                    break;
+                }
+            }
+
             WRITE(VirtualPage, PhysicalPage, NumofUniqueProcesses, ID, VPage, i, Full);
         }
 
