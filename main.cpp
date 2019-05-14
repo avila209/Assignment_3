@@ -376,7 +376,6 @@ void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page 
                                         *(VirtualPage[n].PT.PPage2 + y) = -1;
                                         VirtualPage[n].PT.present[y] = false;
                                         *(VirtualPage[q].PT.PPage2 + VPage[i]) = k;
-                                        cout << "Y: " << y << endl;
                                         break;
                                         //Store new process into physical page
                                     }
@@ -393,10 +392,6 @@ void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page 
                                 if(SwapPage[h].modified){
                                     SwapPage[h].modified = false;
                                     inSwap = true;
-
-                                    cout << "Found one in swap: h = " << h << endl;
-                                    cout << "***Process: " << ID[i] << ", Write: " << SwapPage[h].Write << ", Order: " << SwapPage[h].Order
-                                         << ", Accessed: " << SwapPage[h].Accessesd << endl;
                                     break;
                                 }
                             }
@@ -418,10 +413,6 @@ void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page 
                                 PhysicalPage[t].Accessed = SwapPage[h].Accessesd;
                                 PhysicalPage[t].Dirty = true;
                                 PhysicalPage[t].Order = SwapPage[h].Order;
-
-                                cout << "Process: " << ID[i] << " was in swap, adding swap parameters to physical page: " << t << endl;
-                                cout << "Parameters: \n" << "Write: " << PhysicalPage[t].Write << "\nRead: " << PhysicalPage[t].Read << "\nAccessed: " <<
-                                PhysicalPage[t].Accessed << "\nOrder: " << PhysicalPage[t].Order << endl;
                             }
                         }
                         break;
@@ -636,8 +627,6 @@ void READ(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqu
     for(int q = 0; q < NumofUniqueProcesses; q++) {
         if (VirtualPage[q].ID == ID[i] && VirtualPage[q].Allocated) {
             int P = *(VirtualPage[q].PT.PPage2 + VPage[i]);
-
-            cout << "Bool Write: " << PhysicalPage[P].Write << ", Process: " << ID[i] << ", Line: " << i+1 << ", Physical page: " << P << endl;
 
             //Read from page # of virtual process
             //Need to utilize the PT to find virtual to physical
