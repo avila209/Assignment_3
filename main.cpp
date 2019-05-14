@@ -214,6 +214,14 @@ int main() {
             for(int t = 0; t < NumofUniqueProcesses; t++) {
                 if(VirtualPage[t].ID == ID[i] && !VirtualPage[t].PT.present[VPage[i]]) {
                     cout << "Attempting to read from file currently in the swap, i = " << i << "Process: " << ID[i] << endl;
+
+                    for(int d = 0; d < 200; d++){
+                        if(SwapPage[d].ID == ID[i] && SwapPage[d].VirtualPage == VPage[i]){
+                            cout << "Process: " << ID[i] << ", Write: " << SwapPage[d].Write << ", Order: " << SwapPage[d].Order
+                            << ", Accessed: " << SwapPage[d].Accessesd << endl;
+                        }
+                    }
+
                     ALLOCATE(VirtualPage, PhysicalPage, SwapPage, NumofUniqueProcesses, pagenumber, ID, VPage, i, Full, Policy);
                     break;
                 }
@@ -317,20 +325,6 @@ void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page 
         //Search for virtual page with matching ID numbers.
         for(int q = 0; q < NumofUniqueProcesses; q++){
 
-
-            //if already in swap page list
-            bool inSwap = false;
-            int h;
-            for(h = 0; h < 200; h++){
-                if(SwapPage[h].ID == ID[i] && SwapPage[h].VirtualPage == VPage[i]){
-                    if(SwapPage[h].modified){
-                        SwapPage[h].modified = false;
-                        inSwap = true;
-                        break;
-                    }
-                }
-            }
-
             if(VirtualPage[q].ID == ID[i] && VirtualPage[q].Created){
                         VirtualPage[q].PT.modified[VPage[i]] = true;
                         VirtualPage[q].PT.present[VPage[i]] = true;
@@ -387,11 +381,24 @@ void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page 
                                         //Store new process into physical page
                                     }
                                 }
-                                // ******************************************************************** Might need to add taking out of swap when looping back again
-
-
-
                                 break;
+                            }
+                        }
+
+                        //if already in swap page list
+                        bool inSwap = false;
+                        int h;
+                        for(h = 0; h < 200; h++){
+                            if(SwapPage[h].ID == ID[i] && SwapPage[h].VirtualPage == VPage[i]){
+                                if(SwapPage[h].modified){
+                                    SwapPage[h].modified = false;
+                                    inSwap = true;
+
+                                    cout << "Found one in swap: h = " << h << endl;
+                                    cout << "***Process: " << ID[i] << ", Write: " << SwapPage[h].Write << ", Order: " << SwapPage[h].Order
+                                         << ", Accessed: " << SwapPage[h].Accessesd << endl;
+                                    break;
+                                }
                             }
                         }
 
@@ -411,6 +418,10 @@ void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page 
                                 PhysicalPage[t].Accessed = SwapPage[h].Accessesd;
                                 PhysicalPage[t].Dirty = true;
                                 PhysicalPage[t].Order = SwapPage[h].Order;
+
+                                cout << "Process: " << ID[i] << " was in swap, adding swap parameters to physical page: " << t << endl;
+                                cout << "Parameters: \n" << "Write: " << PhysicalPage[t].Write << "\nRead: " << PhysicalPage[t].Read << "\nAccessed: " <<
+                                PhysicalPage[t].Accessed << "\nOrder: " << PhysicalPage[t].Order << endl;
                             }
                         }
                         break;
@@ -537,20 +548,6 @@ void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page 
                 //Need to find lowest precendence case and swap.
                 int k = rand() % 20;
 
-                //if already in swap page list
-                bool inSwap = false;
-                int h;
-                for(h = 0; h < 200; h++){
-                    if(SwapPage[h].ID == ID[i] && SwapPage[h].VirtualPage == VPage[i]){
-                        if(SwapPage[h].modified){
-                            SwapPage[h].modified = false;
-                            inSwap = true;
-                            break;
-                        }
-                    }
-                }
-
-
                         int n; //stores the Process matching random physical page
                         for (n = 0; n < NumofUniqueProcesses; n++) {
                             if (VirtualPage[n].ID == PhysicalPage[k].ID) break;
@@ -583,6 +580,19 @@ void ALLOCATE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, Swap_Page 
                             }
                         }
                         // ******************************************************************** Might need to add taking out of swap when looping back again
+
+                        //if already in swap page list
+                        bool inSwap = false;
+                        int h;
+                        for(h = 0; h < 200; h++){
+                            if(SwapPage[h].ID == ID[i] && SwapPage[h].VirtualPage == VPage[i]){
+                                if(SwapPage[h].modified){
+                                    SwapPage[h].modified = false;
+                                    inSwap = true;
+                                    break;
+                                }
+                            }
+                        }
 
                         if(!inSwap){
                             PhysicalPage[k].ID = ID[i];
@@ -626,6 +636,9 @@ void READ(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqu
     for(int q = 0; q < NumofUniqueProcesses; q++) {
         if (VirtualPage[q].ID == ID[i] && VirtualPage[q].Allocated) {
             int P = *(VirtualPage[q].PT.PPage2 + VPage[i]);
+
+            cout << "Bool Write: " << PhysicalPage[P].Write << ", Process: " << ID[i] << ", Line: " << i+1 << ", Physical page: " << P << endl;
+
             //Read from page # of virtual process
             //Need to utilize the PT to find virtual to physical
             if (VPage[i] == *(VirtualPage[q].PT.VPage2 + VPage[i]) && PhysicalPage[P].Write) {  //in physical page
@@ -633,10 +646,6 @@ void READ(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqu
                 P = *(VirtualPage[q].PT.PPage2 + VPage[i]);
                 PhysicalPage[P].Read = true;
                 PhysicalPage[P].Accessed++;
-            }
-
-            else if (VPage[i] == *(VirtualPage[q].PT.VPage2 + VPage[i]) && VirtualPage[q].PT.present[VPage[i]]){ //in virtual page
-
             }
 
             else {
