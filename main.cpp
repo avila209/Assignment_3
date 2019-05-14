@@ -210,11 +210,13 @@ int main() {
         if(Action[i] == 'R'){
             //Check if page is swapped out
             for(int t = 0; t < NumofUniqueProcesses; t++) {
-                if(VirtualPage[t].ID == ID[i] && !VirtualPage[t].PT.present[VPage[i]]) {
+                if(VirtualPage[t].ID == ID[i] && !VirtualPage[t].PT.present[VPage[i]] && !VirtualPage[t].Killed && *(VirtualPage[t].PT.VPage2 + VPage[i]) == VPage[i]) {
+                    cout << "Re-Allocating for process: " << ID[i] << endl;
+
                     ALLOCATE(VirtualPage, PhysicalPage, SwapPage, NumofUniqueProcesses, pagenumber, ID, VPage, i, Full, Policy);
                     break;
                 }
-                else{
+                else if(VirtualPage[t].ID == ID[i] && VirtualPage[t].PT.present[VPage[i]] && !VirtualPage[t].Killed && *(VirtualPage[t].PT.VPage2 + VPage[i]) == VPage[i]){
                     break;
                 }
             }
@@ -225,12 +227,14 @@ int main() {
         //WRITE
         if(Action[i] == 'W'){
             //Check if page is swapped out
-            for(int t = 0; t < NumofUniqueProcesses; t++) {
-                if(VirtualPage[t].ID == ID[i] && !VirtualPage[t].PT.present[VPage[i]]) {
+            for(int e = 0; e < NumofUniqueProcesses; e++) {
+                if(VirtualPage[e].ID == ID[i] && !VirtualPage[e].PT.present[VPage[i]] && !VirtualPage[e].Killed && *(VirtualPage[e].PT.VPage2 + VPage[i]) == VPage[i]) {
+                    cout << "Re-Allocating for process: " << ID[i] << endl;
+
                     ALLOCATE(VirtualPage, PhysicalPage, SwapPage, NumofUniqueProcesses, pagenumber, ID, VPage, i, Full, Policy);
                     break;
                 }
-                else{
+                else if(VirtualPage[e].ID == ID[i] && VirtualPage[e].PT.present[VPage[i]] && !VirtualPage[e].Killed && *(VirtualPage[e].PT.VPage2 + VPage[i]) == VPage[i]){
                     break;
                 }
             }
@@ -242,6 +246,8 @@ int main() {
         if(Action[i] == 'F'){
             FREE(VirtualPage, PhysicalPage, NumofUniqueProcesses, ID, i, VPage);
         }
+
+        cout << i << endl;
     }
     //*************** Finished loading into the physical table ****************************
 
@@ -666,10 +672,10 @@ void READ(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqu
 void WRITE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqueProcesses, int ID[], int VPage[], int i, bool Full){
     //Search for virtual page with matching ID numbers.
     for(int q = 0; q < NumofUniqueProcesses; q++){
-        if(VirtualPage[q].ID == ID[i] && VirtualPage[q].Allocated){
+        if(VirtualPage[q].ID == ID[i]){
             int P;
             //Need to utilize the PT to find virtual to physical
-            if(VPage[i] == *(VirtualPage[q].PT.VPage2 + VPage[i])){
+            if(VPage[i] == *(VirtualPage[q].PT.VPage2 + VPage[i]) && VirtualPage[q].Allocated){
                 //Add write flag and increase accessed of physical page.
                 P = *(VirtualPage[q].PT.PPage2 + VPage[i]);
                 PhysicalPage[P].Write = true;
