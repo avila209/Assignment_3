@@ -51,46 +51,47 @@ void FREE(Virtual_Page *VirtualPage, Physical_Page *PhysicalPage, int NumofUniqu
 int main() {
     Physical_Page PhysicalPage[20];
 
-    for(int q = 0; q < 20; q++){
+    for (int q = 0; q < 20; q++) {
         PhysicalPage[q].ID = -1;
     }
 
-    string filename = "memory.dat";
-
+    string filename = "meory.dat";
     ifstream file(filename);
 
+    bool failed = false;
+
+    if (file.is_open()) cout << "File opened correctly." << endl;
+    else failed = true;
+    cout << "File failed to open, enter correct filename to the filename string." << endl;
+
     string line;
-    while(!file.eof()){
-        getline(file,line);
+    while (!file.eof() && !failed) {
+        getline(file, line);
         size++;
     }
     file.close();
 
     file.open(filename);
 
-    if(file.is_open()) cout << "File opened correctly." << endl;
-    else cout << "Failed" << endl;
-
-    int ID [size];
-    char Action [size];
-    int VPage [size];
+    int ID[size];
+    char Action[size];
+    int VPage[size];
 
     size--;
 
     cout << "PID" << "\t" << "Act" << "\t" << "Page" << endl;
 
     int i = 0;
-    while(!file.eof()){
+    while (!file.eof() && !failed) {
         file >> ID[i] >> ws >> Action[i] >> ws;
 
-        if(Action[i] == 'C' || Action[i] == 'T') VPage[i] = '\0';
+        if (Action[i] == 'C' || Action[i] == 'T') VPage[i] = '\0';
         else file >> VPage[i];
 
-        if(i <= size){
-            if(Action[i] == 'C' || Action[i] == 'T'){
+        if (i <= size) {
+            if (Action[i] == 'C' || Action[i] == 'T') {
                 cout << ID[i] << "\t" << Action[i] << endl;
-            }
-            else{
+            } else {
                 cout << ID[i] << "\t" << Action[i] << "\t" << VPage[i] << endl;
             }
         }
@@ -99,16 +100,16 @@ int main() {
 
     cout << endl;
 
-    int Policy = 0; bool valid = false;
-    while(!valid){
+    int Policy = 0;
+    bool valid = false;
+    while (!valid && !failed) {
         cout << "Enter the swap policy you would like to proceed with from the list below:" << endl;
         cout << "\t 1. FIFO \n\t 2. LRU \n\t 3. Random" << endl;
         cout << "\t Choice: ";
         cin >> Policy;
-        if(Policy == 1 || Policy == 2 || Policy == 3){
+        if (Policy == 1 || Policy == 2 || Policy == 3) {
             valid = true;
-        }
-        else{
+        } else {
             cout << "Invalid input." << endl;
         }
     }
@@ -117,44 +118,44 @@ int main() {
 
     int NumProcesses = 0;
     //Find all unique processes
-    for (int z=0; z<=size; z++){
+    for (int z = 0; z <= size; z++) {
         // Check if the picked element is already printed
         int j;
-        for (j=0; j<z; j++)
-            if (ID[z] == ID[j]){
+        for (j = 0; j < z; j++)
+            if (ID[z] == ID[j]) {
                 break;
             }
         // If not printed earlier, then print it
-        if (z == j){
+        if (z == j) {
             NumProcesses++;
         }
     }
 
     int NumofUniqueProcesses = 0;
-    for (int k=0; k<=size; k++){
+    for (int k = 0; k <= size; k++) {
         // Check if the picked element is already printed
         int j;
-        for (j=0; j<k; j++)
-            if (ID[k] == ID[j]){
+        for (j = 0; j < k; j++)
+            if (ID[k] == ID[j]) {
                 break;
             }
         // If not printed earlier, then print it
-        if (k == j){
+        if (k == j) {
             NumofUniqueProcesses++;
         }
     }
 
     int Unique_Processes[NumofUniqueProcesses];
     int count = 0;
-    for (int k=0; k<=size; k++){
+    for (int k = 0; k <= size; k++) {
         // Check if the picked element is already printed
         int j;
-        for (j=0; j<k; j++)
-            if (ID[k] == ID[j]){
+        for (j = 0; j < k; j++)
+            if (ID[k] == ID[j]) {
                 break;
             }
         // If not printed earlier, then print it
-        if (k == j){
+        if (k == j) {
             Unique_Processes[count] = ID[k];
             count++;
         }
@@ -164,9 +165,9 @@ int main() {
     Virtual_Page VirtualPage[NumofUniqueProcesses];
     Swap_Page SwapPage[200];
 
-    for(i = 0; i < NumofUniqueProcesses; i++){
+    for (i = 0; i < NumofUniqueProcesses; i++) {
         VirtualPage[i].ID = Unique_Processes[i];
-        for(int k = 0; k < 200; k++){
+        for (int k = 0; k < 200; k++) {
             VirtualPage[i].PT.modified[k] = false;
             VirtualPage[i].PT.present[k] = false;
 
@@ -174,64 +175,69 @@ int main() {
     }
 
     //*************** Load data into empty physical page table ****************************
-    int pagenumber = 0; bool Full = false;
-    for(i = 0; i <= size; i++){
+    int pagenumber = 0;
+    bool Full = false;
+    for (i = 0; i <= size; i++) {
         //CHECK IF PAGE TABLE NOT FULL
-        for(int u = 0; u < 20; u++){
-            if(PhysicalPage[u].ID == -1){
+        for (int u = 0; u < 20; u++) {
+            if (PhysicalPage[u].ID == -1) {
                 pagenumber = u;
                 break;
             }
 
-            if(u == 19){
+            if (u == 19) {
                 Full = true;
                 break;
             }
         }
 
         //ALLOCATE
-        if(Action[i] == 'A') {
+        if (Action[i] == 'A') {
             ALLOCATE(VirtualPage, PhysicalPage, SwapPage, NumofUniqueProcesses, pagenumber, ID, VPage, i, Full, Policy);
         }
 
         //CREATE
-        if(Action[i] == 'C'){
+        if (Action[i] == 'C') {
             CREATE(VirtualPage, PhysicalPage, NumofUniqueProcesses, ID, i);
         }
 
-        if(Action[i] == 'T'){
+        if (Action[i] == 'T') {
             TERMINATE(VirtualPage, PhysicalPage, NumofUniqueProcesses, ID, i);
         }
 
         //READ
-        if(Action[i] == 'R'){
+        if (Action[i] == 'R') {
             //Check if page is swapped out
-            for(int t = 0; t < NumofUniqueProcesses; t++) {
-                if(VirtualPage[t].ID == ID[i] && !VirtualPage[t].PT.present[VPage[i]] && !VirtualPage[t].Killed && *(VirtualPage[t].PT.VPage2 + VPage[i]) == VPage[i]) {
+            for (int t = 0; t < NumofUniqueProcesses; t++) {
+                if (VirtualPage[t].ID == ID[i] && !VirtualPage[t].PT.present[VPage[i]] && !VirtualPage[t].Killed &&
+                    *(VirtualPage[t].PT.VPage2 + VPage[i]) == VPage[i]) {
                     cout << "Re-Allocating for process: " << ID[i] << endl;
 
-                    ALLOCATE(VirtualPage, PhysicalPage, SwapPage, NumofUniqueProcesses, pagenumber, ID, VPage, i, Full, Policy);
+                    ALLOCATE(VirtualPage, PhysicalPage, SwapPage, NumofUniqueProcesses, pagenumber, ID, VPage, i, Full,
+                             Policy);
                     break;
-                }
-                else if(VirtualPage[t].ID == ID[i] && VirtualPage[t].PT.present[VPage[i]] && !VirtualPage[t].Killed && *(VirtualPage[t].PT.VPage2 + VPage[i]) == VPage[i]){
+                } else if (VirtualPage[t].ID == ID[i] && VirtualPage[t].PT.present[VPage[i]] &&
+                           !VirtualPage[t].Killed && *(VirtualPage[t].PT.VPage2 + VPage[i]) == VPage[i]) {
                     break;
                 }
             }
 
-            READ(VirtualPage, PhysicalPage, NumofUniqueProcesses,  ID, VPage, i, Full);
+            READ(VirtualPage, PhysicalPage, NumofUniqueProcesses, ID, VPage, i, Full);
         }
 
         //WRITE
-        if(Action[i] == 'W'){
+        if (Action[i] == 'W') {
             //Check if page is swapped out
-            for(int e = 0; e < NumofUniqueProcesses; e++) {
-                if(VirtualPage[e].ID == ID[i] && !VirtualPage[e].PT.present[VPage[i]] && !VirtualPage[e].Killed && *(VirtualPage[e].PT.VPage2 + VPage[i]) == VPage[i]) {
+            for (int e = 0; e < NumofUniqueProcesses; e++) {
+                if (VirtualPage[e].ID == ID[i] && !VirtualPage[e].PT.present[VPage[i]] && !VirtualPage[e].Killed &&
+                    *(VirtualPage[e].PT.VPage2 + VPage[i]) == VPage[i]) {
                     cout << "Re-Allocating for process: " << ID[i] << endl;
 
-                    ALLOCATE(VirtualPage, PhysicalPage, SwapPage, NumofUniqueProcesses, pagenumber, ID, VPage, i, Full, Policy);
+                    ALLOCATE(VirtualPage, PhysicalPage, SwapPage, NumofUniqueProcesses, pagenumber, ID, VPage, i, Full,
+                             Policy);
                     break;
-                }
-                else if(VirtualPage[e].ID == ID[i] && VirtualPage[e].PT.present[VPage[i]] && !VirtualPage[e].Killed && *(VirtualPage[e].PT.VPage2 + VPage[i]) == VPage[i]){
+                } else if (VirtualPage[e].ID == ID[i] && VirtualPage[e].PT.present[VPage[i]] &&
+                           !VirtualPage[e].Killed && *(VirtualPage[e].PT.VPage2 + VPage[i]) == VPage[i]) {
                     break;
                 }
             }
@@ -240,48 +246,52 @@ int main() {
         }
 
         //FREE
-        if(Action[i] == 'F'){
+        if (Action[i] == 'F') {
             FREE(VirtualPage, PhysicalPage, NumofUniqueProcesses, ID, i, VPage);
         }
     }
     //*************** Finished loading into the physical table ****************************
 
+    if(!failed){
 
-    cout << "PHYSICAL PAGE" << endl;
-    for(i = 0; i < 20; i++){
-        cout << i << "\t \t \t";
-        if(PhysicalPage[i].ID == -1){
-            cout << "FREE" << endl;
-        }else{
-            cout << PhysicalPage[i].ID << endl;
-        }
-    }
-
-    cout << endl;
-    cout << "VIRTUAL PAGE" << endl;
-    for(i = 0; i < NumofUniqueProcesses; i++){
-        cout << "Process: " << VirtualPage[i].ID << endl;
-        for(int x = 0; x < 200; x++){
-            if(VirtualPage[i].PT.modified[x] && !VirtualPage[i].Killed){
-                if(VirtualPage[i].PT.present[x]){
-                    cout << "\t" << "Virtual Page: " << *(VirtualPage[i].PT.VPage2+x) << "   \t Physical Page: " << *(VirtualPage[i].PT.PPage2+x) << endl;
-                }
-                else{
-                    cout << "\t" << "Virtual Page: " << *(VirtualPage[i].PT.VPage2+x) << "   \t Physical Page: " << "SWAP" << endl;
-                }
+        cout << "PHYSICAL PAGE" << endl;
+        for (i = 0; i < 20; i++) {
+            cout << i << "\t \t \t";
+            if (PhysicalPage[i].ID == -1) {
+                cout << "FREE" << endl;
+            } else {
+                cout << PhysicalPage[i].ID << endl;
             }
         }
 
-        if(VirtualPage[i].Killed){
-            cout << "\tKILLED" << endl;
-        }
-    }
+        cout << endl;
+        cout << "VIRTUAL PAGE" << endl;
+        for (i = 0; i < NumofUniqueProcesses; i++) {
+            cout << "Process: " << VirtualPage[i].ID << endl;
+            for (int x = 0; x < 200; x++) {
+                if (VirtualPage[i].PT.modified[x] && !VirtualPage[i].Killed) {
+                    if (VirtualPage[i].PT.present[x]) {
+                        cout << "\t" << "Virtual Page: " << *(VirtualPage[i].PT.VPage2 + x) << "   \t Physical Page: "
+                             << *(VirtualPage[i].PT.PPage2 + x) << endl;
+                    } else {
+                        cout << "\t" << "Virtual Page: " << *(VirtualPage[i].PT.VPage2 + x) << "   \t Physical Page: "
+                             << "SWAP" << endl;
+                    }
+                }
+            }
 
-    cout << endl;
-    cout << "SWAP" << endl;
-    for(int i = 0; i < 200; i++){
-        if(SwapPage[i].modified){
-            cout << "\t" << "Process: " << SwapPage[i].ID << "\t" << "Virtual Page: " << SwapPage[i].VirtualPage <<  endl;
+            if (VirtualPage[i].Killed) {
+                cout << "\tKILLED" << endl;
+            }
+        }
+
+        cout << endl;
+        cout << "SWAP" << endl;
+        for (int i = 0; i < 200; i++) {
+            if (SwapPage[i].modified) {
+                cout << "\t" << "Process: " << SwapPage[i].ID << "\t" << "Virtual Page: " << SwapPage[i].VirtualPage
+                     << endl;
+            }
         }
     }
 
