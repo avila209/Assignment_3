@@ -55,7 +55,7 @@ int main() {
         PhysicalPage[q].ID = -1;
     }
 
-    string filename = "meory.dat";
+    string filename = "memory.dat";
     ifstream file(filename);
 
     bool failed = false;
