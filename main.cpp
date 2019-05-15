@@ -55,7 +55,9 @@ int main() {
         PhysicalPage[q].ID = -1;
     }
 
-    ifstream file("sample-jobs.dat");
+    string filename = "memory.dat";
+
+    ifstream file(filename);
 
     string line;
     while(!file.eof()){
@@ -64,7 +66,7 @@ int main() {
     }
     file.close();
 
-    file.open("sample-jobs.dat");
+    file.open(filename);
 
     if(file.is_open()) cout << "File opened correctly." << endl;
     else cout << "Failed" << endl;
